@@ -1,0 +1,9 @@
+/target
+/.nrepl-port
+/.lein-*
+*.jar
+.DS_Store
+# Local env vars (AACT_USER/AACT_PASSWORD/PORT/...), if you use direnv or similar --
+# never commit real credentials. See resources/config.edn's header comment.
+.env
+.envrc.local

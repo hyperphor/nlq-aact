@@ -1,0 +1,50 @@
+;;; Way config. Profiles: :dev :server :default (see hyperphor.way.config).
+;;; No :basic-auth-creds -- this is a small public demo backend, not gated
+;;; the way okc is. No credentials live in this file: AACT's db user/
+;;; password come from env vars via aero's #env reader tag (same pattern as
+;;; okc's own :port #env PORT). Never replace these with literal values --
+;;; see okc's untracked scrap/postgres_private.clj, the plaintext-credential
+;;; mistake this file exists to avoid repeating.
+
+{:dev-mode #profile {:dev true :default false}
+ :port #env PORT
+
+ :nlq
+ [;; AACT: public aggregate ClinicalTrials.gov data
+  ;; (https://aact.ctti-clinicaltrials.org), a real Postgres db -- see
+  ;; design/postgres.md. :tables limits generation to a subset of the
+  ;; ctgov schema's 70+ tables (see hyperphor.nlq-aact.schema-gen/
+  ;; regenerate-schema, which generated resources/aact/schema.alz.edn from
+  ;; these same tables' real FK constraints + AACT's own published data
+  ;; dictionary).
+  {:name "AACT"
+   :db
+   {:provider :postgres
+    :host "aact-db.ctti-clinicaltrials.org"
+    :port 5432
+    :dbname "aact"
+    :pg-schema "ctgov"
+    :user #env AACT_USER
+    :password #env AACT_PASSWORD
+    :tables ["studies" "sponsors" "conditions" "interventions" "facilities"
+             "outcomes" "eligibilities" "brief_summaries" "keywords" "design_groups"
+             "calculated_values" "designs" "study_references" "reported_events"]
+    :source-label "AACT (Postgres)"
+    :source-url "https://aact.ctti-clinicaltrials.org"}
+   :schema "aact/schema.alz.edn"
+   :sql-dialect "PostgreSQL"
+   :examples
+   [{:nl "Show full studies table", :sql "select * from studies", :prompt? false}
+    {:nl "What conditions are studied most often?"
+     :sql "select name, count(*) from conditions group by name order by count(*) desc limit 20"}
+    {:nl "How many studies are recruiting for lung cancer?"
+     :sql "select count(distinct s.nct_id) from studies s join conditions c on c.nct_id = s.nct_id where s.overall_status = 'RECRUITING' and c.downcase_name like '%lung cancer%'"}
+    {:nl "Show phase III studies sponsored by Pfizer"
+     :sql "select s.* from studies s join sponsors sp on sp.nct_id = s.nct_id where s.phase = 'PHASE3' and sp.name ilike '%pfizer%'"}
+    {:nl "What are the most common interventions studied for melanoma?"}
+    {:nl "Show facilities in California running studies for diabetes"}
+    {:nl "What's the average enrollment for completed phase II trials?"}
+    {:nl "what are the most common adverse events in prostate cancer trials"}]
+   :llm {:provider :openai
+         :model "gpt-4o"
+         :system "You are a computational biologist and clinical trials expert."}}]}
