@@ -10,10 +10,10 @@ the full history of this split.
 
 ## Status
 
-Backend only so far -- routes exposing `hyperphor.nlq.generate/endpoint` for the `:sql`
-query type against the `"AACT"` project. No frontend yet (see the split plan's
-"Destination 2" section, step 4 -- own `package.json`, shadow-cljs build, query UI --
-follow-on work, not started).
+Backend + a minimal frontend: three tabs (about / NL query / schema browser), modeled
+directly on okc's own `frontend/core.cljs`. The NL_query tab is `hyperphor.nlq.frontend.
+sql-query/ui` (the real query-UI component the library ships) called against the single
+`"AACT"` project; the schema tab is an iframe onto the generated Alzabo schema doc.
 
 ## Running
 
@@ -21,11 +21,27 @@ follow-on work, not started).
 export AACT_USER=... AACT_PASSWORD=...   # AACT read-only reporting account
 lein run 8090
 ```
+then open `http://localhost:8090/`. Or hit the API directly:
+```
+curl 'http://localhost:8090/api/qbox/query?id=sql&project=AACT&query=Show+full+studies+table'
+```
 
-Then:
-```
-curl 'http://localhost:8090/api/query?query=Show+full+studies+table'
-```
+For frontend dev iteration, `npm install` once, then either `lein shadow watch app`
+(hot-reload) or `lein shadow release app` (optimized, what the `:uberjar` profile's
+`prep-tasks` also run).
+
+## Known issue: `/api/config` currently ships credentials to the browser
+
+`hyperphor.way.ui.config/init` (which the frontend shell calls on every page load) fetches
+`GET /api/config`, which is `hyperphor.way.handler/base-api-routes`' `(content-response
+(config/config))` -- the **entire** raw config map, unredacted, including this app's
+`#env`-resolved `AACT_USER`/`AACT_PASSWORD`. (There's a properly-redacted path,
+`hyperphor.way.data`'s `:config` data-method via `/api/data?data-id=config`, but the real
+frontend init path doesn't use it.) This is a `hyperphor/way` bug, not specific to this
+app -- it affects every `way`-based frontend, including okc's own Cirro/BigQuery
+credentials -- so it isn't fixed here (out of scope for this repo). AACT's own exposure is
+lower-stakes (a read-only public-data reporting account), but worth fixing upstream before
+relying on this pattern for anything with real secrets.
 
 ## Credentials
 

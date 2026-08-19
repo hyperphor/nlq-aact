@@ -6,7 +6,18 @@
 ;;; see okc's untracked scrap/postgres_private.clj, the plaintext-credential
 ;;; mistake this file exists to avoid repeating.
 
-{:dev-mode #profile {:dev true :default false}
+{:app-title "AACT NL Query"
+ ;; NOTE the underscore in nlq_aact, not a hyphen: this is the compiled JS
+ ;; global path window.onload calls (see hyperphor.way.views.html/app-html),
+ ;; and cljs's ^:export munges every namespace segment's "-" to "_" for
+ ;; JS-identifier-safety -- "nlq-aact.init()" is invalid JS syntax (parses
+ ;; as subtraction) and silently never boots the app. Verified against the
+ ;; actual compiled bundle (grepped resources/public/cljs-out/dev-main.js
+ ;; for the goog.exportSymbol path array), not guessed -- okc's own
+ ;; app-main never hit this because none of its namespace segments have a
+ ;; hyphen.
+ :app-main "hyperphor.nlq_aact.frontend.core.init"
+ :dev-mode #profile {:dev true :default false}
  :port #env PORT
 
  :nlq

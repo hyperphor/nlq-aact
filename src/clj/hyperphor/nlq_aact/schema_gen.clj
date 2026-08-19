@@ -6,13 +6,16 @@
    templates that turn hyperphor.nlq.sources.postgres/gen-alz-schema (fully
    generic) into AACT's actual resources/aact/schema.alz.edn.
 
-   Not run at startup -- call `regenerate-schema` from a REPL against a live
-   AACT connection (see resources/config.edn's \"AACT\" :nlq entry) whenever
-   AACT's schema changes or the data dictionary CSV is refreshed."
+   `regenerate-schema` (DB-hitting) is NOT run at startup -- call it from a
+   REPL against a live AACT connection whenever AACT's schema changes or the
+   data dictionary CSV is refreshed. `generate-schema-doc` (HTML-doc-only,
+   no DB access, just reads the already-generated schema.alz.edn) IS called
+   at startup, from core.clj -- see that fn's docstring."
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
             [clojure.pprint :as pprint]
             [hyperphor.nlq.sources.postgres :as pg]
+            [hyperphor.nlq.schema :as schema]
             [hyperphor.nlq.config :as nlqc]))
 
 ;;; The dictionary's Description column mixes real semantic docs in with
@@ -104,6 +107,19 @@
         schema (assoc-in schema [:kinds :studies :unique-id] :studies/nct_id)]
     (spit out-path (with-out-str (pprint/pprint schema)))
     schema))
+
+(defn generate-schema-doc
+  "Generate the Alzabo HTML schema doc for the AACT project --
+   resources/public/AACT/schema/index.html, what the frontend's :schema
+   tab's iframe points at (see hyperphor.nlq-aact.frontend.core/schema).
+   Reads the already-generated resources/aact/schema.alz.edn (no DB access,
+   no network) via hyperphor.nlq.schema/init, same mechanism okc uses for
+   its own per-project schema tabs. Safe to call on every boot (fast, local-
+   file-only); called from core.clj's -main, non-fatally -- a failure here
+   shouldn't take down the whole app, just leave the schema tab broken
+   until fixed (same caution as okc's own commented-out startup call)."
+  []
+  (schema/init [(nlqc/project-named "AACT")]))
 
 (comment
   ;; Dev-time invocation. Requires config.edn loaded (AACT_USER/AACT_PASSWORD
