@@ -1,30 +1,16 @@
 ;;; Way config. Profiles: :dev :server :default (see hyperphor.way.config).
-;;; No :basic-auth-creds -- this is a small public demo backend, not gated
-;;; the way okc is. No credentials live in this file: AACT's db user/
-;;; password come from env vars via aero's #env reader tag (same pattern as
-;;; okc's own :port #env PORT). Never replace these with literal values --
-;;; see okc's untracked scrap/postgres_private.clj, the plaintext-credential
-;;; mistake this file exists to avoid repeating.
 
 {:app-title "AACT NL Query"
- ;; NOTE the underscore in nlq_aact, not a hyphen: this is the compiled JS
- ;; global path window.onload calls (see hyperphor.way.views.html/app-html),
- ;; and cljs's ^:export munges every namespace segment's "-" to "_" for
- ;; JS-identifier-safety -- "nlq-aact.init()" is invalid JS syntax (parses
- ;; as subtraction) and silently never boots the app. Verified against the
- ;; actual compiled bundle (grepped resources/public/cljs-out/dev-main.js
- ;; for the goog.exportSymbol path array), not guessed -- okc's own
- ;; app-main never hit this because none of its namespace segments have a
- ;; hyphen.
  :app-main "hyperphor.nlq_aact.frontend.core.init"
  :dev-mode #profile {:dev true :default false}
  :port #env PORT
-
  :nlq
  [;; AACT: public aggregate ClinicalTrials.gov data
   ;; (https://aact.ctti-clinicaltrials.org), a real Postgres db -- see
-  ;; design/postgres.md. :tables limits generation to a subset of the
-  ;; ctgov schema's 70+ tables (see hyperphor.nlq-aact.schema-gen/
+  ;; design/postgres.md.
+
+  ;; :tables limits generation to a subset of the ctgov schema's 70+ tables
+  ;; (see hyperphor.nlq-aact.schema-gen/
   ;; regenerate-schema, which generated resources/aact/schema.alz.edn from
   ;; these same tables' real FK constraints + AACT's own published data
   ;; dictionary).
@@ -45,7 +31,9 @@
    :schema "aact/schema.alz.edn"
    :sql-dialect "PostgreSQL"
    :examples
-   [{:nl "Show full studies table", :sql "select * from studies", :prompt? false}
+   [{:nl "Show the 1000 most recent studies, in full", :sql "select * from studies ORDER BY study_first_posted_date DESC LIMIT 1000;", :prompt? false}
+    ;; "Show full studies table" times out, no good
+
     {:nl "What conditions are studied most often?"
      :sql "select name, count(*) from conditions group by name order by count(*) desc limit 20"}
     {:nl "How many studies are recruiting for lung cancer?"
@@ -54,7 +42,7 @@
      :sql "select s.* from studies s join sponsors sp on sp.nct_id = s.nct_id where s.phase = 'PHASE3' and sp.name ilike '%pfizer%'"}
     {:nl "What are the most common interventions studied for melanoma?"}
     {:nl "Show facilities in California running studies for diabetes"}
-    {:nl "What's the average enrollment for completed phase II trials?"}
+    {:nl "What's the average enrollment for completed trials by phase?"}
     {:nl "what are the most common adverse events in prostate cancer trials"}]
    :llm {:provider :openai
          :model "gpt-4o"
