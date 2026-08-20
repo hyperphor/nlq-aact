@@ -15,3 +15,4 @@
 # never commit real credentials. See resources/config.edn's header comment.
 .env
 .envrc.local
+checkouts

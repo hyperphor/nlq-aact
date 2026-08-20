@@ -4,6 +4,9 @@
  :app-main "hyperphor.nlq_aact.frontend.core.init"
  :dev-mode #profile {:dev true :default false}
  :port #env PORT
+ ;; Own stylesheet, loaded after way's fixed-css -- same mechanism okc uses
+ ;; for its own okc.css. See resources/public/css/nlq-aact.css.
+ :css ["/css/nlq-aact.css"]
  :nlq
  [;; AACT: public aggregate ClinicalTrials.gov data
   ;; (https://aact.ctti-clinicaltrials.org), a real Postgres db -- see

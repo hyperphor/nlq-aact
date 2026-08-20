@@ -1,0 +1,39 @@
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Combine with hstack (and vstack) to get rid of Bootstrap's default
+   centering alignment -- see hyperphor.nlq.frontend.sql-query/ui, whose
+   top-level card-stack/results row already carries this class waiting for
+   an app stylesheet to define it (same fix as okc's own okc.css). Without
+   this, the (usually much shorter) query-card column sits vertically
+   centered against the taller results column instead of top-aligned. */
+.istack {
+  align-items: inherit;
+}
+
+/* ── About tab ────────────────────────────────────────────────────────── */
+
+.about-hero {
+  padding: 20px 0 8px 0;
+}
+
+.about-hero h2 {
+  margin: 0 0 8px 0;
+}
+
+.about-credits {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid #e3e3e3;
+  font-size: 0.9em;
+  color: #6b6b6b;
+}
+
+.about-credits p {
+  margin: 0 0 4px 0;
+}
