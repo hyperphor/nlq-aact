@@ -6,7 +6,12 @@
             ;; (side-effect-only require, same pattern okc uses for
             ;; hyperphor.nlq.sources.cirro) -- without this the :postgres
             ;; provider dispatch in hyperphor.nlq.sources.sql has no method
-            ;; to fall through to.
+            ;; to fall through to. Also where the BigDecimal/BigInteger ->
+            ;; double/long transit-tag coercion lives (untag-numerics,
+            ;; wrapping this ns's own sql/query :postgres) -- not AACT-
+            ;; specific, so it belongs there rather than here; see
+            ;; design/TODO.md's "average enrollment ... weird tagged value"
+            ;; entry for why. Requires com.hyperphor/nlq >= 0.3.3.
             hyperphor.nlq.sources.postgres
             ;; Registers the :sql-inspect wd/data method the object
             ;; inspector's /api/data route (way's generic base-api-routes)

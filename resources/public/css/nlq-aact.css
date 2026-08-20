@@ -17,13 +17,22 @@ a:hover {
 }
 
 /* ── About tab ────────────────────────────────────────────────────────── */
+/* Colors/gradient match hyperphor.com's own header exactly (its inline
+   <style>, checked 2026-08-20) -- reusing the real Hyperphor brand rather
+   than inventing a new palette for this one small demo app. */
 
 .about-hero {
-  padding: 20px 0 8px 0;
+  background: linear-gradient(135deg, #b08968 0%, #8b9a8e 50%, #9d8b88 100%);
+  color: #fff;
+  padding: 28px 32px;
+  margin-bottom: 20px;
 }
 
 .about-hero h2 {
-  margin: 0 0 8px 0;
+  margin: 0;
+  font-size: 1.8em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
 }
 
 .about-credits {
@@ -36,4 +45,8 @@ a:hover {
 
 .about-credits p {
   margin: 0 0 4px 0;
+}
+
+.about-credits a {
+  color: #7a8a7f;
 }

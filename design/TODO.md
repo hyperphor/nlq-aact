@@ -9,20 +9,19 @@ and this repo's own source — same pattern as okc's `home-credits`. Added
 `:css ["/css/nlq-aact.css"]`, same mechanism okc uses for `okc.css`) with
 light styling for the hero/credits blocks.
 
-# NL page layout
+## Followup
 
-qbox should be at top of col, not vertically centered
+Needs to have hyperphor logos or colors or something. Branding! Think like a marketing person, it's not something I'm good at.
 
-**Status: DONE.** Root cause: `hyperphor.nlq.frontend.sql-query/ui`'s
-top-level row (`[:div.hstack.istack.m-3.gap-3 ...]`, wrapping the query-card
-column and the results column) uses Bootstrap's `.hstack` utility, which
-defaults to `align-items: center` — so the (usually much shorter) card
-column sits vertically centered against the taller results column instead
-of top-aligned. The library already anticipated this with a companion
-`.istack` class, left undefined on purpose for the consuming app to
-override (okc does the same thing in its own `okc.css`). Fixed here by
-adding `.istack { align-items: inherit; }` to the new `nlq-aact.css` (see
-above) — no library/nlq-aact.frontend.core.cljs changes needed.
+**Status: DONE.** hyperphor.com has no logo image (checked its live HTML,
+2026-08-20) — just a text wordmark and a distinctive header gradient
+(`linear-gradient(135deg, #b08968 0%, #8b9a8e 50%, #9d8b88 100%)`, tan →
+sage → dusty rose). Reused that gradient verbatim for a full-width
+`.about-hero` banner behind the "AACT NL Query" title, and its sage accent
+(`#7a8a7f`) for the credits-block links — real Hyperphor branding rather
+than an invented palette, and it stays trivially in sync in spirit even if
+it drifts in fact (hyperphor.com could restyle later without this needing
+to match pixel-for-pixel).
 
 # Probably need better visualization examples
 
@@ -155,40 +154,42 @@ roughly cheapest-first:
 
 Works but has weird  "tagged value" outputs
 
-**Status: DIAGNOSED, PLAN (not done).** Reproduced live: the SQL and raw JSON
-are both clean —
+**Status: DONE.** Confirmed root cause (my first pass at this, guessing from
+the clean-looking raw JSON, wrongly blamed ag-grid column grouping —
+superseded by this): `AVG(enrollment)` comes back from Postgres as
+`java.math.BigDecimal`. transit-clj tags a `BigDecimal` `~f` (bigdec); the
+frontend's transit reader (`hyperphor.way.api`'s plain `:transit` ajax
+config — no custom read handlers registered) has no handler for `~f`, so the
+value lands in the UI as a raw, unrendered `Transit$TaggedValue` instead of
+a number — exactly the `#object[Transit$TaggedValue [TaggedValue: f,
+70.4358781496803310]]` observed live. (My earlier curl-based repro missed
+this because plain `curl` sends no `Accept` header, so `wrap-restful-format`
+fell back to JSON, where cheshire serializes `BigDecimal` as an ordinary
+number — the bug only shows up on the real transit path the browser
+actually uses.)
 
-```sql
-SELECT phase, AVG(enrollment) AS average_enrollment
-FROM ctgov.studies WHERE overall_status = 'COMPLETED' GROUP BY phase;
-```
-```json
-{"phase": "PHASE3", "average_enrollment": 720.8984482419957}
-```
+Not AACT-specific — any Postgres source hitting an aggregate query has this
+problem — so, per feedback on this pass, moved out of nlq-aact entirely and
+fixed at the actual query boundary instead: `hyperphor.nlq.sources.postgres`
+(the `hyperphor/nlq` library, `/opt/mt/repos/hyperphor/nlq`)'s
+`sql/query :postgres` method now runs every row through a new
+`untag-numerics` (`clojure.walk/postwalk`) that coerces `BigDecimal` →
+`double` (and `BigInteger` → `long`, same reasoning, tag `~n`) — so results
+round-trip as plain transit `~d` doubles, which every transit reader,
+including the frontend's unmodified one, handles natively. Released as
+`com.hyperphor/nlq` 0.3.3 (bumped from 0.3.2, `lein install`ed to local
+`~/.m2` — not yet pushed/tagged upstream, that commit is still local to that
+repo, on its `infer-schema` branch); nlq-aact's own `project.clj` bumped to
+match, and `handler.clj`'s local `untag-numerics` copy removed. Verified
+end-to-end again against the new dependency (2026-08-20): same clean
+`Accept: application/transit+json` response, zero `~f` tags.
 
-— so the "tagged value" look is a **grid-rendering artifact**, not a data
-problem. The response's `:columns` metadata resolves `phase` to the
-`studies` kind (`{:kind "studies", :field "phase", :icon "🧪", :enum? true,
-...}`), and `sql-query.cljs`'s `ag-column-defs`/`column-groups` wraps *any*
-column with a resolved `:kind` in a spanning, collapsible two-row ag-grid
-group header (`{:groupId "studies" :headerName "Studies" :children [...]}`)
-— even when, as here, it's the *only* member of that group (no companion
-`nct_id`/other `studies` column present in this particular result set). The
-`average_enrollment` column, having no schema match, renders as a plain
-ungrouped column right beside it. The visual result — one column boxed under
-a "Studies" header, its sibling not — is what reads as "tagged"/oddly
-structured. This is a `hyperphor/nlq` library behavior
-(`hyperphor.nlq.frontend.sql-query/ag-column-defs`), not nlq-aact's own code,
-so not fixable here without forking that ns. Worth raising upstream: skip the
-group-header wrapping when a semantic group has exactly one member (fall
-through to the same plain-column rendering unresolved columns already get).
+Only a partial general fix, even at this new location — any *other*
+BigDecimal/BigInteger-shaped result is covered, since `untag-numerics`
+walks every row, but the same class of problem could in principle recur for
+some other transit extension type AACT/Postgres produces that has no
+frontend reader (eg `~t` instant, `~u` uuid) if a query ever surfaces one —
+none seen so far, not preemptively handled.
 
-# Really need editbable SQL
 
-An NLQ issue, not specific here
 
-**Status: OUT OF SCOPE for this repo** (confirmed, not re-investigated this
-pass) — this needs a `hyperphor/nlq` frontend change (the `:sql` card in
-`sql-query.cljs`'s `ui` renders the generated query as a plain
-`[:pre.m-3 query]`, not an editable field wired back into `:qbox-query`).
-File upstream against `hyperphor/nlq` if/when prioritized.
