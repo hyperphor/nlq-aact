@@ -1,4 +1,6 @@
-# Works but has weird  "tagged value" outputs
+## What's the average enrollment for completed trials by phase?
+
+Works but has weird  "tagged value" outputs
 
 **Status: DONE.** Confirmed root cause (my first pass at this, guessing from
 the clean-looking raw JSON, wrongly blamed ag-grid column grouping —
@@ -38,4 +40,16 @@ frontend reader (eg `~t` instant, `~u` uuid) if a query ever surfaces one —
 none seen so far, not preemptively handled.
 
 
+
+## Show full studies table
+
+times out due to size, need paging or some better theory
+
+Replaced with a limited one
+
+**Status: DONE** (already fixed, prior to this pass — confirmed by re-reading
+`resources/config.edn`'s current `:examples`: the example is now "Show the
+1000 most recent studies, in full" / `... ORDER BY study_first_posted_date
+DESC LIMIT 1000;`, with `:prompt? false` so it doesn't also bias the LLM's
+few-shot prompt for unrelated queries).
 

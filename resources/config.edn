@@ -46,7 +46,16 @@
     {:nl "What are the most common interventions studied for melanoma?"}
     {:nl "Show facilities in California running studies for diabetes"}
     {:nl "What's the average enrollment for completed trials by phase?"}
-    {:nl "what are the most common adverse events in prostate cancer trials"}]
+    {:nl "what are the most common adverse events in prostate cancer trials"}
+    {:nl "show the largest trials for melanoma that involved nivolumab"
+     :sql "SELECT s.nct_id, s.brief_title, s.enrollment, i.name AS intervention_name, c.name AS condition_name
+FROM ctgov.studies s
+JOIN ctgov.conditions c ON s.nct_id = c.nct_id
+JOIN ctgov.interventions i ON s.nct_id = i.nct_id
+WHERE c.downcase_name LIKE '%melanoma%'
+  AND i.name LIKE '%nivolumab%'
+ORDER BY s.enrollment DESC;"}
+    ]
    :llm {:provider :openai
          :model "gpt-4o"
          :system "You are a computational biologist and clinical trials expert."}}]}

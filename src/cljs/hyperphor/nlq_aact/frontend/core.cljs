@@ -7,26 +7,36 @@
             [hyperphor.way.ui.init :as init]
             [hyperphor.nlq.frontend.sql-query :as sql-query]))
 
+;; hyperphor.com's own wordmark gif -- no local logo asset exists, and this
+;; is what the app-hosting linked to instead (see design/TODO.md). Hotlinked
+;; rather than vendored, same as any other external link to hyperphor.com.
+(def hyperphor-logo-url "https://hyperphor.com/hyperphor2.gif")
+
+;; Gradient lifted from hyperphor.com itself (see .site-hero in
+;; nlq-aact.css) -- reuses the actual Hyperphor brand rather than inventing
+;; a new one for this one small demo app. Site-wide (app-ui), not just the
+;; about tab, so it's visible from every tab.
+(defn site-header
+  []
+  [:div.site-hero
+   [:img.site-hero-logo {:src hyperphor-logo-url :alt "Hyperphor"}]
+   [:h2 "AACT NL Query"]])
+
 (defn about
   []
-  [:div
-   ;; Gradient + wordmark styling lifted from hyperphor.com itself (see
-   ;; .about-hero in nlq-aact.css) -- reuses the actual Hyperphor brand
-   ;; rather than inventing a new one for this one small demo app.
-   [:div.about-hero
-    [:h2 "AACT NL Query"]]
-   [:div.p-3 {:style {:max-width "800px"}}
-    [:p "AACT (Aggregate Analysis of ClinicalTrials.gov) is a public, regularly
-         refreshed copy of the full ClinicalTrials.gov trial registry, published
-         as a queryable Postgres database by the Clinical Trials Transformation
-         Initiative. Ask a question in plain English on the "
-     [:b "NL_query"] " tab and it's translated to SQL and run live against it."]
-    [:p [:a {:href "https://aact.ctti-clinicaltrials.org"} "aact.ctti-clinicaltrials.org"]]
-    [:div.about-credits
-     [:p "Built by Mike Travers / " [:a {:href "https://hyperphor.com"} "Hyperphor"]]
-     [:p "Powered by " [:a {:href "https://github.com/hyperphor/nlq"} "hyperphor/nlq"]
-      ", a natural-language-to-SQL query engine."]
-     [:p [:a {:href "https://github.com/hyperphor/nlq-aact"} "Source"] " for this app."]]]])
+  [:div.p-3 {:style {:max-width "800px"}}
+   [:p "AACT (Aggregate Analysis of ClinicalTrials.gov) is a public, regularly
+        refreshed copy of the full ClinicalTrials.gov trial registry, published
+        as a queryable Postgres database by the Clinical Trials Transformation
+        Initiative. Ask a question in plain English on the "
+    [:b "NL_query"] " tab and it's translated to SQL and run live against it."]
+   [:p [:a {:href "https://aact.ctti-clinicaltrials.org"} "aact.ctti-clinicaltrials.org"]]
+   [:div.about-credits
+    [:p [:img.credit-logo {:src hyperphor-logo-url :alt "Hyperphor"}]
+     "Built by Mike Travers / " [:a {:href "https://hyperphor.com"} "Hyperphor"]]
+    [:p "Powered by " [:a {:href "https://github.com/hyperphor/nlq"} "hyperphor/nlq"]
+     ", a natural-language-to-SQL query engine."]
+    [:p [:a {:href "https://github.com/hyperphor/nlq-aact"} "Source"] " for this app."]]])
 
 (defn schema
   []
@@ -43,6 +53,7 @@
 (defn app-ui
   []
   [:div
+   [site-header]
    [tabs/tabs-nav
     :tab
     (array-map

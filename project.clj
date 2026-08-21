@@ -35,6 +35,7 @@
   :resource-paths ["resources"]
   :target-path "target/%s"
   :clean-targets ^{:protect false} [".shadow-cljs" "resources/public/cljs-out" "target" "shadow-cljs.edn"]
+  :uberjar-name "aact-standalone.jar"
   :profiles {:uberjar {:aot :all
                        :omit-source true
                        :prep-tasks [["shadow" "release" "app"] "javac" "compile"] ;NOTE omitting javac/compile breaks :aot, per okc's own note
