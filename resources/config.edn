@@ -55,6 +55,26 @@ JOIN ctgov.interventions i ON s.nct_id = i.nct_id
 WHERE c.downcase_name LIKE '%melanoma%'
   AND i.name LIKE '%nivolumab%'
 ORDER BY s.enrollment DESC;"}
+    {:nl "show trials for schizophrenia with open enrollment in california. " ; Include relevant location and specific condition
+     :sql "SELECT 
+    s.nct_id,
+    s.brief_title,
+    c.name AS condition_name,
+    f.name AS facility_name,
+    f.city,
+    f.state
+FROM 
+    ctgov.studies s
+JOIN 
+    ctgov.conditions c ON s.nct_id = c.nct_id
+JOIN 
+    ctgov.facilities f ON s.nct_id = f.nct_id
+WHERE 
+    c.downcase_name LIKE '%schizophrenia%'
+    AND s.overall_status = 'RECRUITING'
+    AND f.state = 'California';
+"}
+
     ]
    :llm {:provider :openai
          :model "gpt-4o"

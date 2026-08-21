@@ -19,8 +19,9 @@
 (defn site-header
   []
   [:div.site-hero
-   [:img.site-hero-logo {:src hyperphor-logo-url :alt "Hyperphor"}]
-   [:h2 "AACT NL Query"]])
+   [:h2 "AACT NL Query"]
+   [:a.site-hero-logo-link {:href "https://hyperphor.com"}
+    [:img.site-hero-logo {:src hyperphor-logo-url :alt "Hyperphor"}]]])
 
 (defn about
   []
@@ -29,7 +30,7 @@
         refreshed copy of the full ClinicalTrials.gov trial registry, published
         as a queryable Postgres database by the Clinical Trials Transformation
         Initiative. Ask a question in plain English on the "
-    [:b "NL_query"] " tab and it's translated to SQL and run live against it."]
+    [:b "NL query"] " tab and it's translated to SQL and run live against it."]
    [:p [:a {:href "https://aact.ctti-clinicaltrials.org"} "aact.ctti-clinicaltrials.org"]]
    [:div.about-credits
     [:p [:img.credit-logo {:src hyperphor-logo-url :alt "Hyperphor"}]

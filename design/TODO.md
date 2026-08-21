@@ -53,6 +53,13 @@ corners) but not seamless. Living with it per "for lack of anything
 better"; a transparent-background version would clean this up if one shows
 up later.
 
+**Refinement (2026-08-21):** moved the header logo to the right edge (was
+left, next to the title) via `margin-left: auto` on its flex-item wrapper,
+title stays left; wrapped it in an `<a href="https://hyperphor.com">` so
+it's clickable too (the credits-block copy already linked, this one
+previously didn't). Screenshot-verified via the same Playwright session as
+the inspector-grid fix below.
+
 
 # Probably need better visualization examples
 
@@ -180,4 +187,39 @@ roughly cheapest-first:
    toward `DISTINCT`/semi-joins whenever a one-to-many join is used purely
    as a filter — a general fix, not AACT-specific, but out of scope for this
    repo to implement directly.
+
+# Inspector grid shows "Rows: N" but no rows visible
+
+Reported: clicking an id/FK cell opens the inspector card, the row-count
+footer reads correctly (eg "Rows: 35"), but the grid area above it is blank
+— no data rows rendered.
+
+**Status: DONE.** ag-grid needs an explicit height on its own container div
+to render any rows — without one the row *count*/header still compute
+correctly (that's independent of layout), but the scrollable viewport
+collapses to 0px and nothing is visible. `hyperphor.nlq.frontend.sql-query
+/inspector-grid` passes `:class "aggrid-inspector"` on its `ag/ag-table`
+call specifically expecting the *consuming app* to size that class — this
+app's `nlq-aact.css` never defined it (okc's own `okc.css` does: `.aggrid-
+inspector { width: 100%; height: 60vh; }`, the exact same contract). Added
+the identical rule here.
+
+Verified end-to-end (2026-08-21) via a scripted real-Chrome session
+(Playwright, since the browser extension wasn't connected this session —
+`pip install`ed into a throwaway venv, removed after): ran a live NL query
+("List the NCT ID and brief title of 10 phase III studies sponsored by
+Pfizer") against real AACT, clicked an `nct_id` cell, confirmed the
+inspector card now shows a fully populated transposed field/value grid
+("studies NCT07578649" with `brief_title`/`completion_date`/... rows
+visible), not a blank area.
+
+Only the inspector grid was actually broken — the *main* results grid
+(`sql-grid-view`) renders fine with no equivalent CSS rule, because its
+wrapping divs (`sql-query.cljs`'s `ui`) carry explicit `:style {:height
+"50%"/"90%"}` inline, which resolves against `html-frame-spa`'s `:body
+{:style {:height 5000}}` hack; `inspector-grid`'s `.aggrid-inspector`
+never gets an inline height from its caller (`inspector-pane`), so it was
+depending entirely on this app's stylesheet, which didn't have it. Confirmed
+by testing the main grid live too (screenshot: 1,134-row `SELECT s.*`
+query rendered rows correctly) — not the same bug recurring there.
 
