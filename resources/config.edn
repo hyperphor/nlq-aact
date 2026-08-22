@@ -2,11 +2,18 @@
 
 {:app-title "AACT NL Query"
  :app-main "hyperphor.nlq_aact.frontend.core.init"
- :dev-mode #profile {:dev true :default false}
+ :dev-mode true ;TEMP #profile {:dev true :default false}
  :port #env PORT
  ;; Own stylesheet, loaded after way's fixed-css -- same mechanism okc uses
  ;; for its own okc.css. See resources/public/css/nlq-aact.css.
  :css ["/css/nlq-aact.css"]
+ ;; DynamoDB log -- see hyperphor.nlq.generate/record 
+ ;; :table must already exist (String partition key "uuid" --
+ :nlq-log {:type :dynamo
+            :table "nlq-log"
+            :region "us-west-2"
+           ;; auth is via standard env variables and that seems hard change
+            }
  :nlq
  [;; AACT: public aggregate ClinicalTrials.gov data
   ;; (https://aact.ctti-clinicaltrials.org), a real Postgres db -- see

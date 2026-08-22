@@ -100,6 +100,13 @@ see `hyperphor.way.config`):
   and the `:llm` provider/model/system-prompt.
 - No credentials ever live in this file or repo — `AACT_USER`/`AACT_PASSWORD`/`PORT` all
   come from env vars via aero's `#env` tag. Never replace these with literal values.
+- `:nlq-log {:type :dynamo :table :region}` — optional query logging (every NL query
+  logged to DynamoDB), a no-op if absent. Implemented in the `hyperphor/nlq` library
+  itself (`hyperphor.nlq.generate/record`, `hyperphor.nlq.logging.dynamo`), not this
+  app — `:type :bigquery` is the library's other backend (what okc uses). Credentials
+  via `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` env vars; see README's "Query
+  logging" section and `design/logging.md`. A broken/misconfigured log target logs a
+  warning but never fails the query response itself.
 
 ## Known issue: `/api/config` ships credentials to the browser
 
