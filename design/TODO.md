@@ -223,3 +223,35 @@ depending entirely on this app's stylesheet, which didn't have it. Confirmed
 by testing the main grid live too (screenshot: 1,134-row `SELECT s.*`
 query rendered rows correctly) — not the same bug recurring there.
 
+# Schema page "Entities" section is blank
+
+**Status: DONE.** Real `alzabo` bug, not this app's. `hyperphor.alzabo.html/
+index->html` renders the Entities section as `(if (> (count categories) 1)
+(for [category-name (keys categories)] ...))` — no `else` clause. AACT's
+schema has no `:categories` key of its own, so it falls back to alzabo's
+own `default-graph-options` (`{:categories {:default {...}}}`), a single
+entry — `(count categories)` is 1, the `if` is false, and the *entire* `for`
+(the whole entities table, not just some header) evaluates to `nil`. Root
+cause: a recent alzabo commit ("restore category headers", `57ff8b7`)
+changed `(if true ...)` back to `(if (> (count categories) 1) ...)`, meaning
+to suppress a redundant single-category `<h3>` heading, but wrapped the
+*whole loop* in that condition instead of just the heading — so a
+single-category schema (the common case) lost its entities list entirely,
+not just its heading.
+
+Fixed in `alzabo` (`/opt/mt/repos/hyperphor/alzabo`, `incorporates` branch —
+same branch-is-really-trunk situation as `nlq`'s `infer-schema`, `main` is
+still at 1.3.0): always run the `for` loop; only the `<h3>` category header
+is now conditional on `(> (count categories) 1)`. 1.3.4 → 1.3.5,
+`lein install`ed locally (uncommitted upstream, same as every other library
+bump this repo's git log records). Propagated: `nlq`'s alzabo pin bumped to
+1.3.5 (0.3.5 → 0.3.6, `lein install`ed), this app's `nlq` pin bumped to
+0.3.6.
+
+**Verified live (2026-08-23)**: deleted the stale generated `resources/
+public/AACT/schema/index.html`, booted a real `lein run` (regenerates it at
+startup), screenshotted the result — the Entities table now shows all 14
+kinds with their docs, correctly with *no* redundant "Default" heading
+(single category, as intended). Root-caused via `grep`+`git show` on the
+exact alzabo commit that introduced the regression, not guessed.
+
