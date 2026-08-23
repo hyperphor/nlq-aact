@@ -35,7 +35,18 @@
     :password #env AACT_PASSWORD
     :tables ["studies" "sponsors" "conditions" "interventions" "facilities"
              "outcomes" "eligibilities" "brief_summaries" "keywords" "design_groups"
-             "calculated_values" "designs" "study_references" "reported_events"]
+             "calculated_values" "designs" "study_references" "reported_events"
+             ;; Tier 1 remainder (design/aact-tables.md)
+             "design_outcomes" "design_group_interventions" "reported_event_totals"
+             ;; Tier 2 (design/aact-tables.md) -- mesh_terms/mesh_headings
+             ;; deliberately not included, see that doc: no real FK ties them
+             ;; to anything (browse_conditions/browse_interventions link by
+             ;; text match on mesh_term, not id), so gen-alz-schema can't
+             ;; wire them into the schema as a real relation.
+             "outcome_measurements" "outcome_analyses" "outcome_analysis_groups" "result_groups"
+             "browse_conditions" "browse_interventions"
+             "baseline_measurements" "baseline_counts"
+             "overall_officials"]
     :source-label "AACT (Postgres)"
     :source-url "https://aact.ctti-clinicaltrials.org"}
    :schema "aact/schema.alz.edn"
@@ -106,6 +117,25 @@ WHERE
     AND s.overall_status = 'RECRUITING'
     AND f.state = 'North carolina'
     AND e.adult = TRUE;"}
+    ;; Tier 2 tables (design/aact-tables.md) -- real posted results/stats,
+    ;; not just study metadata.
+    {:nl "Which melanoma trials showed a statistically significant overall survival benefit, based on p-value under 0.05?"
+     :sql "SELECT o.nct_id, o.title AS outcome_title, oa.p_value, oa.param_value, oa.method, c.name AS condition_name
+FROM ctgov.outcomes o
+JOIN ctgov.outcome_analyses oa ON o.id = oa.outcome_id
+JOIN ctgov.conditions c ON o.nct_id = c.nct_id
+WHERE c.downcase_name LIKE '%melanoma%'
+  AND (o.title ILIKE '%overall survival%' OR o.description ILIKE '%overall survival%')
+  AND oa.p_value < 0.05;"}
+    {:nl "Who are the principal investigators for melanoma trials at Stanford?"
+     :sql "SELECT oo.name AS principal_investigator
+FROM ctgov.studies s
+JOIN ctgov.overall_officials oo ON s.nct_id = oo.nct_id
+JOIN ctgov.facilities f ON s.nct_id = f.nct_id
+JOIN ctgov.conditions c ON s.nct_id = c.nct_id
+WHERE c.downcase_name LIKE '%melanoma%'
+  AND f.name ILIKE '%stanford%'
+  AND oo.role = 'PRINCIPAL_INVESTIGATOR';"}
     ]
    :llm {:provider :openai
          :model "gpt-4o"
