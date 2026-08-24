@@ -82,6 +82,30 @@ WHERE
     AND f.state = 'California';
 "}
 
+    ;; Added because it didn't always generate ADULT = TRUE, which may be a schema issue TODOa look into
+    {:nl "show me currently recruiting trials for ulcerative colitis in adults with sites in north carolina."
+     :sql "SELECT 
+    s.nct_id,
+    s.brief_title,
+    c.name AS condition_name,
+    f.name AS facility_name,
+    f.city,
+    f.state,
+    e.minimum_age,
+    e.maximum_age
+FROM 
+    ctgov.studies s
+JOIN 
+    ctgov.conditions c ON s.nct_id = c.nct_id
+JOIN 
+    ctgov.facilities f ON s.nct_id = f.nct_id
+JOIN
+    ctgov.eligibilities e ON s.nct_id = e.nct_id
+WHERE 
+    c.downcase_name LIKE '%ulcerative colitis%'
+    AND s.overall_status = 'RECRUITING'
+    AND f.state = 'North carolina'
+    AND e.adult = TRUE;"}
     ]
    :llm {:provider :openai
          :model "gpt-4o"

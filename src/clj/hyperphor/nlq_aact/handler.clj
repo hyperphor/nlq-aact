@@ -2,20 +2,8 @@
   (:require [compojure.core :refer [defroutes context GET]]
             [hyperphor.way.handler :as wh]
             [hyperphor.nlq.generate :as nlq]
-            ;; Registers sql/query|project-tables|qualify-table-name :postgres
-            ;; (side-effect-only require, same pattern okc uses for
-            ;; hyperphor.nlq.sources.cirro) -- without this the :postgres
-            ;; provider dispatch in hyperphor.nlq.sources.sql has no method
-            ;; to fall through to. Also where the BigDecimal/BigInteger ->
-            ;; double/long transit-tag coercion lives (untag-numerics,
-            ;; wrapping this ns's own sql/query :postgres) -- not AACT-
-            ;; specific, so it belongs there rather than here; see
-            ;; design/TODO.md's "average enrollment ... weird tagged value"
-            ;; entry for why. Requires com.hyperphor/nlq >= 0.3.3.
             hyperphor.nlq.sources.postgres
-            ;; Registers the :sql-inspect wd/data method the object
-            ;; inspector's /api/data route (way's generic base-api-routes)
-            ;; needs -- same require-for-side-effect pattern.
+            [hyperphor.nlq.visgen :as visgen]
             hyperphor.nlq.inspect))
 
 ;;; hyperphor.nlq.frontend.qbox's :qbox-query event -- what sql-query.cljs's
@@ -32,7 +20,8 @@
 (defn qbox-endpoint
   [id query _project]
   (case (keyword id)
-    :sql (nlq/endpoint "AACT" :sql query)
+    :sql              (nlq/endpoint "AACT" :sql query)
+    (:vizq :sql-vizq) (visgen/viz-endpoint "AAcT" query)
     {:error (str "Unsupported query type for this app: " id)}))
 
 (defroutes site-routes)
