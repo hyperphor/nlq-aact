@@ -35,10 +35,18 @@
                       [[table field] doc])))
             rows))))
 
+;; Tier 1/2 per design/aact-tables.md -- mesh_terms/mesh_headings
+;; deliberately excluded (no real FK, see that doc's Tier 2 section and this
+;; set's own comment in config.edn).
 (def tables
   #{"studies" "sponsors" "conditions" "interventions" "facilities"
     "outcomes" "eligibilities" "brief_summaries" "keywords" "design_groups"
-    "calculated_values" "designs" "study_references" "reported_events"})
+    "calculated_values" "designs" "study_references" "reported_events"
+    "design_outcomes" "design_group_interventions" "reported_event_totals"
+    "outcome_measurements" "outcome_analyses" "outcome_analysis_groups" "result_groups"
+    "browse_conditions" "browse_interventions"
+    "baseline_measurements" "baseline_counts"
+    "overall_officials"})
 
 (def table-docs
   {"studies"           "A single registered clinical trial (one row per NCT ID)"
@@ -54,7 +62,19 @@
    "calculated_values" "AACT-precomputed summary values for a study (actual enrollment/duration, results-reported status, age range)"
    "designs"           "A study's design methodology (allocation, masking/blinding, intervention model, primary purpose)"
    "study_references"  "A publication (PubMed-linked) associated with a study"
-   "reported_events"   "An adverse event reported for a study, by event type (serious/other) and arm"})
+   "reported_events"   "An adverse event reported for a study, by event type (serious/other) and arm"
+   "design_outcomes"           "A study's planned primary/secondary outcome measure (vs. outcomes, the reported results)"
+   "design_group_interventions" "Join table linking a study's arms (design_groups) to the interventions each arm received"
+   "reported_event_totals"     "Study-level adverse-event summary counts (subjects affected/at risk), by event type and arm"
+   "outcome_measurements"      "The actual posted numeric result (per-arm count/mean/etc) for a defined outcome measure"
+   "outcome_analyses"          "A statistical comparison (p-value, confidence interval) between arms for a defined outcome measure"
+   "outcome_analysis_groups"   "Join table linking an outcome_analysis to the result_groups (arms) it compares"
+   "result_groups"             "An arm/group as reported in a study's posted results (vs. design_groups, the as-designed arms)"
+   "browse_conditions"         "A MeSH-normalized condition term for a study (controlled vocabulary, vs. conditions' free text)"
+   "browse_interventions"      "A MeSH-normalized intervention term for a study (controlled vocabulary, vs. interventions' free text)"
+   "baseline_measurements"     "A baseline (enrolled-population) characteristic measurement for a study arm, as posted in results"
+   "baseline_counts"           "Baseline participant counts per study arm, as posted in results"
+   "overall_officials"         "A principal investigator or study official (name, role, affiliation) for a study"})
 
 (def table-icons
   {"studies"           "🧪"
@@ -70,10 +90,26 @@
    "calculated_values" "🧮"
    "designs"           "📐"
    "study_references"  "📚"
-   "reported_events"   "⚠️"})
+   "reported_events"   "⚠️"
+   "design_outcomes"            "🎯"
+   "design_group_interventions" "🔗"
+   "reported_event_totals"      "🧾"
+   "outcome_measurements"       "📈"
+   "outcome_analyses"           "🔬"
+   "outcome_analysis_groups"    "🧩"
+   "result_groups"              "🗂️"
+   "browse_conditions"          "📇"
+   "browse_interventions"       "🗃️"
+   "baseline_measurements"      "📏"
+   "baseline_counts"            "🔢"
+   "overall_officials"          "📛"})
 
 (def table-labels
-  {"studies" "brief_title"})
+  {"studies"              "brief_title"
+   "result_groups"        "title"
+   "outcome_measurements" "title"
+   "baseline_measurements" "title"
+   "overall_officials"    "name"})
 
 ;; {{value}}-templated, matching hyperphor.nlq.schema/external-link-template's
 ;; generic mustache shape -- NOT pg-aact's original bare-prefix :external-url
