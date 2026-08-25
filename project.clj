@@ -14,7 +14,7 @@
   ;; (none, so far) would need adding here.
   :dependencies [[org.clojure/clojure "1.12.5"]
                  [com.hyperphor/way "0.2.7"]
-                 [com.hyperphor/nlq "0.3.6"]
+                 [com.hyperphor/nlq "0.3.7"]
                  [com.taoensso/timbre "6.7.1"]
                  [environ "1.2.0"]
                  ;; Direct dep, NOT :dev-profile-only -- `lein uberjar`
