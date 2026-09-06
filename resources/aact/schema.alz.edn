@@ -273,7 +273,11 @@
     :plan_to_share_ipd_description {:type :string, :cardinality :one},
     :ipd_url {:type :string, :cardinality :one},
     :is_fda_regulated_device {:type :boolean, :cardinality :one},
-    :overall_status {:type :studies.overall_status, :cardinality :one},
+    :overall_status
+    {:type :studies.overall_status,
+     :cardinality :one,
+     :doc
+     "The study's current status, per ClinicalTrials.gov's fixed vocabulary. Different subsets for EXPANDED_ACCESS trials"},
     :primary_completion_date_type
     {:type :studies.primary_completion_date_type, :cardinality :one},
     :fdaaa801_violation {:type :boolean, :cardinality :one},
@@ -827,12 +831,12 @@
     :STUDY_DIRECTOR "Study Director",
     :SUB_INVESTIGATOR "Sub Investigator"}},
   :studies.last_update_posted_date_type
-  {:values {:ESTIMATED "Estimated", :ACTUAL "Actual"}},
+  {:values {:ACTUAL "Actual", :ESTIMATED "Estimated"}},
   :studies.source_class
   {:values
    {:UNKNOWN "Unknown",
-    :OTHER "Other",
     :OTHER_GOV "Other Gov",
+    :OTHER "Other",
     :NETWORK "Network",
     :NIH "Nih",
     :FED "Fed",
@@ -859,14 +863,18 @@
     :ACTIVE_NOT_RECRUITING "Active Not Recruiting",
     :COMPLETED "Completed",
     :WITHHELD "Withheld",
-    :NO_LONGER_AVAILABLE "No Longer Available",
-    :AVAILABLE "Available",
     :RECRUITING "Recruiting",
-    :APPROVED_FOR_MARKETING "Approved For Marketing",
     :TERMINATED "Terminated",
     :NOT_YET_RECRUITING "Not Yet Recruiting",
-    :TEMPORARILY_NOT_AVAILABLE "Temporarily Not Available",
-    :WITHDRAWN "Withdrawn"}},
+    :WITHDRAWN "Withdrawn"
+
+    ;; These only apply to study_type = 'EXPANDED_ACCESS', maybe just leave them out?
+    :AVAILABLE "Available (EXPANDED_ACCESS only)",
+    :NO_LONGER_AVAILABLE "No Longer Available (EXPANDED_ACCESS only)",
+    :TEMPORARILY_NOT_AVAILABLE "Temporarily Not Available (EXPANDED_ACCESS only)",
+    :APPROVED_FOR_MARKETING "Approved For Marketing (EXPANDED_ACCESS only)",
+
+    }},
   :study_references.reference_type
   {:values
    {:RESULT "Result", :BACKGROUND "Background", :DERIVED "Derived"}},
@@ -898,24 +906,24 @@
   :designs.intervention_model
   {:values
    {:CROSSOVER "Crossover",
-    :FACTORIAL "Factorial",
     :SEQUENTIAL "Sequential",
+    :FACTORIAL "Factorial",
     :PARALLEL "Parallel",
     :SINGLE_GROUP "Single Group"}},
   :designs.allocation
   {:values
    {:RANDOMIZED "Randomized",
-    :NA "Na",
-    :NON_RANDOMIZED "Non Randomized"}},
+    :NON_RANDOMIZED "Non Randomized",
+    :NA "NA"}},
   :outcome_analyses.non_inferiority_type
   {:values
    {:SUPERIORITY_OR_OTHER "Superiority Or Other",
     :NON_INFERIORITY "Non Inferiority",
     :OTHER "Other",
     :SUPERIORITY_OR_OTHER_LEGACY "Superiority Or Other Legacy",
-    :NON_INFERIORITY_OR_EQUIVALENCE "Non Inferiority Or Equivalence",
     :NON_INFERIORITY_OR_EQUIVALENCE_LEGACY
     "Non Inferiority Or Equivalence Legacy",
+    :NON_INFERIORITY_OR_EQUIVALENCE "Non Inferiority Or Equivalence",
     :EQUIVALENCE "Equivalence",
     :SUPERIORITY "Superiority"}},
   :design_outcomes.outcome_type

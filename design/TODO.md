@@ -1,65 +1,22 @@
-# needs some styling on the front page
+# Too much stuff done in code that should be in schema
 
-And links to hyperphor, nlq
 
-**Status: DONE.** Added an `about-credits` block to the `about` tab
-(`frontend/core.cljs`) linking to hyperphor.com, `github.com/hyperphor/nlq`,
-and this repo's own source — same pattern as okc's `home-credits`. Added
-`resources/public/css/nlq-aact.css` (wired via `resources/config.edn`'s new
-`:css ["/css/nlq-aact.css"]`, same mechanism okc uses for `okc.css`) with
-light styling for the hero/credits blocks.
+	
+# log viewer for new DynamoDB log
 
-## Followup
+Basics can be copied from OKC/Bigquery version
 
-Needs to have hyperphor logos or colors or something. Branding! Think like a marketing person, it's not something I'm good at.
+# I'm starting to want a library
 
-**Status: DONE.** hyperphor.com has no logo image (checked its live HTML,
-2026-08-20) — just a text wordmark and a distinctive header gradient
-(`linear-gradient(135deg, #b08968 0%, #8b9a8e 50%, #9d8b88 100%)`, tan →
-sage → dusty rose). Reused that gradient verbatim for a full-width hero
-banner behind the "AACT NL Query" title (`.site-hero` as of Followup 2,
-below — originally `.about-hero`, about-tab-only), and its sage accent
-(`#7a8a7f`) for the credits-block links — real Hyperphor branding rather
-than an invented palette, and it stays trivially in sync in spirit even if
-it drifts in fact (hyperphor.com could restyle later without this needing
-to match pixel-for-pixel).
+Like enflame had...but these queries are so low-cost to enter it probably doesn't make sense
 
-## Followup 2
+I would like an easy to share good examples though.
 
-Title bar needs to go at head of every page, not just on home
+Mayber part of a larger restructiong (with REPL etc)
 
-For a logo, use https://hyperphor.com/hyperphor2.gif for lack of anything better. Should go on the hyperphor page aas well of course
+# Needs work on grid display side
 
-**Status: DONE.** Pulled the hero banner out of `about` into a new
-`site-header`, rendered from `app-ui` above `tabs-nav` — now shows on
-`home`/`NL_query`/`schema` alike, not just the about tab (screenshot-
-verified all three, via headless Chrome against a real `lein run` since the
-browser extension wasn't connected this session). Added
-`https://hyperphor.com/hyperphor2.gif` (hotlinked, not vendored — no local
-asset exists, and hotlinking is consistent with every other reference to
-hyperphor.com already in this app) as `.site-hero-logo` in the banner,
-40px tall.
-
-"Should go on the hyperphor page as well" — read as "wherever we reference
-Hyperphor", since we don't control hyperphor.com's own page: also added a
-smaller copy (`.credit-logo`, 16px) next to the "Hyperphor" credit link in
-`about-credits`. Flagging the interpretation in case that's not what was
-meant.
-
-Only real wart: the gif's own pale-yellow background (not transparent)
-shows as a visible rectangle against the header's gradient and against the
-credits section's white background — looks intentional-ish (rounded
-corners) but not seamless. Living with it per "for lack of anything
-better"; a transparent-background version would clean this up if one shows
-up later.
-
-**Refinement (2026-08-21):** moved the header logo to the right edge (was
-left, next to the title) via `margin-left: auto` on its flex-item wrapper,
-title stays left; wrapped it in an `<a href="https://hyperphor.com">` so
-it's clickable too (the credits-block copy already linked, this one
-previously didn't). Screenshot-verified via the same Playwright session as
-the inspector-grid fix below.
-
+typing, icons etc. The old NLQ code was over reliant on column names, that won't work here, that's probably the problem.
 
 # Probably need better visualization examples
 
