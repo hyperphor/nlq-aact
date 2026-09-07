@@ -1,3 +1,7 @@
+# RuN SQL button has issues
+
+eg, not working at all with no error feedback or anything?
+
 # Too much stuff done in code that should be in schema
 
 
