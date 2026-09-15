@@ -227,14 +227,19 @@ a:hover {
 
 .viz-summary-header::before {
   content: "▸";
-  font-size: 0.8em;
-  color: #7a8a7f;
+  font-size: 1.4em;
+  font-weight: 900;
+  color: #5a7a6a;
   flex: 0 0 auto;
-  transition: transform 0.15s;
+  line-height: 1;
 }
 
 .viz-details[open] .viz-summary-header::before {
   content: "▾";
+}
+
+.viz-summary-header:hover::before {
+  color: #2f2f2f;
 }
 
 .viz-summary-header:hover {

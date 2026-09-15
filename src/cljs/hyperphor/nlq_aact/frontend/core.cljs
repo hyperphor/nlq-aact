@@ -147,35 +147,36 @@
    Collapsed by default; summary line shows row/col counts.
    When there are no results, prompts the user to run a query first."
   []
-  (fn []
-    (let [{:keys [nl results columns]} @(rf/subscribe [:qbox-response :sql])
-          all-cols (some-> results first keys)
-          n-rows   (count results)
-          n-cols   (count all-cols)]
-      [:div.viz-data-summary
-       (if (seq results)
-         [:details.viz-details
-          [:summary.viz-summary-header
-           [:span.viz-summary-counts (str n-rows " rows · " n-cols " cols")]
-           (when nl [:span.viz-summary-nl (str " · " nl)])]
-          [:div.viz-summary-detail
-           [:table.viz-col-table
-            [:thead
-             [:tr
-              [:th.viz-col-kind "Kind"]
-              [:th.viz-col-fields "Fields"]]]
-            [:tbody
-             (for [[gk members] (col-groups all-cols columns)]
-               (let [resolved? (contains? columns (first members))]
-                 [:tr {:key (name gk)}
-                  [:td.viz-col-kind (when resolved? (group-label gk columns members))]
-                  [:td.viz-col-fields
-                   (str/join ", " (map #(col-display-name % columns) members))]]))]]]]
-         [:div.viz-no-data
-          [:span "No data — "]
-           [:a {:href "#"
-                :on-click (fn [e] (.preventDefault e) (rf/dispatch [:set-route [:home]]))}
-            "run a query first"]])])]))
+  (let [{:keys [nl results columns]} @(rf/subscribe [:qbox-response :sql])
+        all-cols (some-> results first keys)
+        n-rows   (count results)
+        n-cols   (count all-cols)]
+    [:div.viz-data-summary
+     (if (seq results)
+       [:details.viz-details {:open true}
+        [:summary.viz-summary-header
+         [:span.viz-summary-counts (str n-rows " rows · " n-cols " cols")]
+         (when nl [:span.viz-summary-nl (str " · " nl)])]
+        [:div.viz-summary-detail
+         [:table.viz-col-table
+          [:thead
+           [:tr
+            [:th.viz-col-kind "Kind"]
+            [:th.viz-col-fields "Fields"]]]
+          [:tbody
+           (for [[gk members] (col-groups all-cols columns)]
+             (let [resolved? (contains? columns (first members))]
+               [:tr {:key (name gk)}
+                [:td.viz-col-kind (when resolved? (group-label gk columns members))]
+                [:td.viz-col-fields
+                 (str/join ", " (map #(col-display-name % columns) members))]]))]]]]
+       [:div.viz-no-data
+        [:span "No data — "]
+        [:a {:href "#"
+             :on-click (fn [e] (.preventDefault e) (rf/dispatch [:set-route [:home]]))}
+         "run a query first"]])]))
+
+
 
 (defn visualize
   []
