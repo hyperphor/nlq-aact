@@ -161,6 +161,10 @@
         [:div.viz-summary-row
          [:span.viz-summary-label "Columns"]
          [:table.viz-col-table
+          [:thead
+           [:tr
+            [:th.viz-col-kind "Kind"]
+            [:th.viz-col-fields "Fields"]]]
           [:tbody
            (for [[gk members] (col-groups all-cols columns)]
              (let [resolved? (contains? columns (first members))]

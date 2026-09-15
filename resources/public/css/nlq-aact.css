@@ -238,24 +238,46 @@ a:hover {
 .viz-col-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 2px;
+  margin-top: 6px;
 }
 
+.viz-col-table th,
 .viz-col-table td {
-  padding: 1px 6px 1px 0;
+  padding: 5px 12px;
   vertical-align: top;
   line-height: 1.4;
 }
 
+/* Header row */
+.viz-col-table thead tr {
+  border-bottom: 2px solid #c8c3bb;
+}
+
+.viz-col-table th {
+  font-weight: 700;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #7a8a7f;
+}
+
+/* Alternating row bands */
+.viz-col-table tbody tr:nth-child(odd) {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* Vertical rule between kind and fields columns */
 .viz-col-kind {
   white-space: nowrap;
-  font-weight: 600;
-  color: #7a8a7f;
-  width: 1%;  /* shrink to content */
+  font-weight: 700;
+  color: #3a3a3a;
+  width: 1%;           /* shrink to content */
+  border-right: 1px solid #d4cfc8;
 }
 
 .viz-col-fields {
   word-break: break-word;
+  color: #4a4a4a;
 }
 
 /* ── NL_query tab ─────────────────────────────────────────────────────── */
