@@ -107,11 +107,47 @@
 
 ;; ── Visualize page: split out of sql-query/ui per design/ui-makeover.md ──
 
+;; Column grouping mirrors sql-query/ag-column-defs logic:
+;; - group key = (or :ref-kind :kind) from the columns-info map
+;; - unresolved columns (absent from columns-info) form singleton groups keyed by the col kw
+;; - group label = icon + capitalized kind name; bare :field name shown inside the group
+
+(defn- col-effective-kind [col columns-info]
+  (let [info (get columns-info col)]
+    (or (:ref-kind info) (:kind info))))
+
+(defn- id-col? [col info]
+  (or (= (:field info) :id)
+      (str/ends-with? (name col) "_id")))
+
+(defn- col-groups
+  "Returns ordered seq of [group-key [col ...]] pairs.
+   Unresolved cols each get their own singleton group keyed by the col kw."
+  [all-cols columns-info]
+  (let [group-key   (fn [col] (or (col-effective-kind col columns-info) col))
+        groups      (group-by group-key all-cols)
+        first-seen  (distinct (map group-key all-cols))]
+    (for [gk first-seen]
+      [gk (->> (get groups gk)
+               (sort-by #(if (id-col? % (get columns-info %)) 0 1)))])))
+
+(defn- group-label [gk columns-info members]
+  (let [icon (:icon (get columns-info (first members)))]
+    (str (when icon (str icon " "))
+         (-> (name gk) (str/replace "-" " ") str/capitalize))))
+
+(defn- col-display-name [col columns-info]
+  (if-let [field (:field (get columns-info col))]
+    (name field)
+    (name col)))
+
 (defn viz-data-summary
-  "Shows the current query context (NL query, row count, columns).
+  "Shows the current query context (NL query, row count, grouped columns).
    When there are no results, prompts the user to run a query first."
   []
-  (let [{:keys [nl query results columns]} @(rf/subscribe [:qbox-response :sql])]
+  (let [{:keys [nl results columns]} @(rf/subscribe [:qbox-response :sql])
+        ;; Use all result columns (not just schema-matched ones)
+        all-cols (some-> results first keys)]
     [:div.viz-data-summary
      (if (seq results)
        [:<>
@@ -124,10 +160,20 @@
          [:span.viz-summary-value (count results)]]
         [:div.viz-summary-row
          [:span.viz-summary-label "Columns"]
-         [:span.viz-summary-value
-          (->> (or (keys columns) (some-> results first keys))
-               (map name)
-               (str/join ", "))]]]
+         (into [:div.viz-summary-value]
+           (for [[gk members] (col-groups all-cols columns)]
+             (let [resolved? (contains? columns (first members))]
+               (if (and resolved? (> (count members) 1))
+                 ;; Multi-column kind group: "Kind: col1, col2"
+                 [:div.viz-col-group {:key (name gk)}
+                  [:span.viz-col-kind (group-label gk columns members) ": "]
+                  (str/join ", " (map #(col-display-name % columns) members))]
+                 ;; Single resolved col or unresolved alias
+                 [:div.viz-col-group {:key (name gk)}
+                  (if resolved?
+                    (str (group-label gk columns members) ": "
+                         (col-display-name (first members) columns))
+                    (name (first members)))]))))]]
        [:div.viz-no-data
         [:span "No data — "]
         [:a {:href "#"

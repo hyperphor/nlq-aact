@@ -234,6 +234,16 @@ a:hover {
   font-style: italic;
 }
 
+.viz-col-group {
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+
+.viz-col-kind {
+  font-weight: 600;
+  color: #7a8a7f;
+}
+
 /* ── NL_query tab ─────────────────────────────────────────────────────── */
 /* ag-grid needs an explicit height on its container to render any rows --
    without one it silently renders a 0-height viewport (row count/header
