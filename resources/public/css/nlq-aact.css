@@ -202,32 +202,40 @@ a:hover {
   color: #4a4a4a;
 }
 
-.viz-summary-row {
+.viz-summary-header {
   display: flex;
-  gap: 10px;
-  margin-bottom: 4px;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
   line-height: 1.4;
-  align-items: flex-start;
 }
 
-.viz-summary-row:last-child {
-  margin-bottom: 0;
+.viz-summary-header:hover {
+  color: #2f2f2f;
 }
 
-.viz-summary-label {
-  flex: 0 0 60px;
-  font-weight: 600;
+.viz-summary-toggle {
+  font-size: 0.85em;
   color: #7a8a7f;
-  text-transform: uppercase;
-  font-size: 0.78em;
-  letter-spacing: 0.06em;
-  padding-top: 2px;
+  flex: 0 0 auto;
 }
 
-.viz-summary-value {
-  flex: 1 1 auto;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+.viz-summary-counts {
+  font-weight: 600;
+  color: #3a3a3a;
+}
+
+.viz-summary-nl {
+  font-weight: 400;
+  color: #6b6b6b;
+  font-style: italic;
+}
+
+.viz-summary-detail {
+  margin-top: 8px;
+  border-top: 1px solid #e3e0da;
+  padding-top: 6px;
 }
 
 .viz-no-data {

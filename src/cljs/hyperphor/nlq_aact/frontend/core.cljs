@@ -7,6 +7,7 @@
    bundles query+grid+viz into one fixed two-column layout with no layout
    knobs of its own."
   (:require [clojure.string :as str]
+             [reagent.core :as r]
              [re-frame.core :as rf]
              [hyperphor.way.tabs :as tabs]
              [hyperphor.way.ui.init :as init]
@@ -143,40 +144,46 @@
 
 (defn viz-data-summary
   "Shows the current query context (NL query, row count, grouped columns).
+   Collapsed by default — header shows row/col counts with a toggle to expand.
    When there are no results, prompts the user to run a query first."
   []
-  (let [{:keys [nl results columns]} @(rf/subscribe [:qbox-response :sql])
-        ;; Use all result columns (not just schema-matched ones)
-        all-cols (some-> results first keys)]
-    [:div.viz-data-summary
-     (if (seq results)
-       [:<>
-        (when nl
-          [:div.viz-summary-row
-           [:span.viz-summary-label "Query"]
-           [:span.viz-summary-value nl]])
-        [:div.viz-summary-row
-         [:span.viz-summary-label "Rows"]
-         [:span.viz-summary-value (count results)]]
-        [:div.viz-summary-row
-         [:span.viz-summary-label "Columns"]
-         [:table.viz-col-table
-          [:thead
-           [:tr
-            [:th.viz-col-kind "Kind"]
-            [:th.viz-col-fields "Fields"]]]
-          [:tbody
-           (for [[gk members] (col-groups all-cols columns)]
-             (let [resolved? (contains? columns (first members))]
-               [:tr {:key (name gk)}
-                [:td.viz-col-kind (when resolved? (group-label gk columns members))]
-                [:td.viz-col-fields
-                 (str/join ", " (map #(col-display-name % columns) members))]]))]]]]
-       [:div.viz-no-data
-        [:span "No data — "]
-        [:a {:href "#"
-             :on-click (fn [e] (.preventDefault e) (rf/dispatch [:set-route [:home]]))}
-         "run a query first"]])]))
+  (let [open? (r/atom false)]
+    (fn []
+      (let [{:keys [nl results columns]} @(rf/subscribe [:qbox-response :sql])
+            all-cols  (some-> results first keys)
+            n-rows    (count results)
+            n-cols    (count all-cols)
+            toggle    #(swap! open? not)
+            arrow     (if @open? "▾" "▸")]
+        [:div.viz-data-summary
+         (if (seq results)
+           [:<>
+            ;; Always-visible header row: toggle + counts summary
+            [:div.viz-summary-header {:on-click toggle}
+             [:span.viz-summary-toggle arrow]
+             [:span.viz-summary-counts
+              (str n-rows " rows · " n-cols " cols")
+              (when nl [:span.viz-summary-nl (str " · " nl)])]]
+            ;; Expanded detail
+            (when @open?
+              [:div.viz-summary-detail
+               [:table.viz-col-table
+                [:thead
+                 [:tr
+                  [:th.viz-col-kind "Kind"]
+                  [:th.viz-col-fields "Fields"]]]
+                [:tbody
+                 (for [[gk members] (col-groups all-cols columns)]
+                   (let [resolved? (contains? columns (first members))]
+                     [:tr {:key (name gk)}
+                      [:td.viz-col-kind (when resolved? (group-label gk columns members))]
+                      [:td.viz-col-fields
+                       (str/join ", " (map #(col-display-name % columns) members))]]))]]]]
+           [:div.viz-no-data
+            [:span "No data — "]
+            [:a {:href "#"
+                 :on-click (fn [e] (.preventDefault e) (rf/dispatch [:set-route [:home]]))}
+             "run a query first"]])]))))
 
 (defn visualize
   []
