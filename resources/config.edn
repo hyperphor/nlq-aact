@@ -196,6 +196,54 @@ JOIN ctgov.designs d ON d.nct_id = s.nct_id
 WHERE c.downcase_name LIKE '%melanoma%'
   AND s.study_type = 'INTERVENTIONAL';"}
     ]
+    :llm {:provider :openai
+          :model "gpt-4o"
+          :system "You are a medical researcher and clinical trials expert."}}
+
+  ;; Vegalite: visualization project used by hyperphor.nlq.visgen/viz-endpoint.
+  ;; No :db or :schema needed — visgen works over @last-query-response, not the DB.
+  ;; :examples must carry :vega keys; only those are passed as few-shot to the LLM.
+  {:name "Vegalite"
    :llm {:provider :openai
          :model "gpt-4o"
-         :system "You are a medical researcher and clinical trials expert."}}]}
+         :system "You are a data visualization expert. Given a table of clinical trials data, produce a Vega-Lite spec (mark + encoding only, no $schema or data) that best answers the user's request."}
+   :examples
+   [{:nl "Bar chart of studies by phase"
+     :vega {:mark {:type "bar" :tooltip {:content "data"}}
+            :encoding {:x {:field "phase" :type "nominal"
+                           :sort "-y"
+                           :axis {:labelAngle -30}}
+                       :y {:aggregate "count" :type "quantitative"
+                           :title "Number of studies"}}}}
+
+    {:nl "Line chart of studies first posted by year from 2000 to 2020"
+     :vega {:mark {:type "line" :point true :tooltip {:content "data"}}
+            :encoding {:x {:field "year" :type "quantitative"
+                           :title "Year first posted"}
+                       :y {:aggregate "count" :type "quantitative"
+                           :title "Number of studies"}}}}
+
+    {:nl "Bar chart of the 15 most common conditions by study count"
+     :vega {:mark {:type "bar" :tooltip {:content "data"}}
+            :encoding {:y {:field "name" :type "nominal"
+                           :sort "-x"
+                           :axis {:labelLimit 200}}
+                       :x {:aggregate "count" :type "quantitative"
+                           :title "Number of studies"}}}}
+
+    {:nl "Histogram of enrollment for completed trials"
+     :vega {:mark {:type "bar" :tooltip {:content "data"}}
+            :encoding {:x {:field "enrollment" :type "quantitative"
+                           :bin {:maxbins 20}
+                           :title "Enrollment"}
+                       :y {:aggregate "count" :type "quantitative"
+                           :title "Number of trials"}}}}
+
+    {:nl "Stacked bar of study count by phase colored by overall status"
+     :vega {:mark {:type "bar" :tooltip {:content "data"}}
+            :encoding {:x {:field "phase" :type "nominal"
+                           :sort "-y"
+                           :axis {:labelAngle -30}}
+                       :y {:aggregate "count" :type "quantitative"
+                           :title "Number of studies"}
+                       :color {:field "overall_status" :type "nominal"}}}}]}]}
