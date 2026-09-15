@@ -207,6 +207,7 @@ a:hover {
   gap: 10px;
   margin-bottom: 4px;
   line-height: 1.4;
+  align-items: flex-start;
 }
 
 .viz-summary-row:last-child {
@@ -234,14 +235,27 @@ a:hover {
   font-style: italic;
 }
 
-.viz-col-group {
-  margin-bottom: 2px;
+.viz-col-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2px;
+}
+
+.viz-col-table td {
+  padding: 1px 6px 1px 0;
+  vertical-align: top;
   line-height: 1.4;
 }
 
 .viz-col-kind {
+  white-space: nowrap;
   font-weight: 600;
   color: #7a8a7f;
+  width: 1%;  /* shrink to content */
+}
+
+.viz-col-fields {
+  word-break: break-word;
 }
 
 /* ── NL_query tab ─────────────────────────────────────────────────────── */

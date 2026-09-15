@@ -160,20 +160,14 @@
          [:span.viz-summary-value (count results)]]
         [:div.viz-summary-row
          [:span.viz-summary-label "Columns"]
-         (into [:div.viz-summary-value]
+         [:table.viz-col-table
+          [:tbody
            (for [[gk members] (col-groups all-cols columns)]
              (let [resolved? (contains? columns (first members))]
-               (if (and resolved? (> (count members) 1))
-                 ;; Multi-column kind group: "Kind: col1, col2"
-                 [:div.viz-col-group {:key (name gk)}
-                  [:span.viz-col-kind (group-label gk columns members) ": "]
-                  (str/join ", " (map #(col-display-name % columns) members))]
-                 ;; Single resolved col or unresolved alias
-                 [:div.viz-col-group {:key (name gk)}
-                  (if resolved?
-                    (str (group-label gk columns members) ": "
-                         (col-display-name (first members) columns))
-                    (name (first members)))]))))]]
+               [:tr {:key (name gk)}
+                [:td.viz-col-kind (when resolved? (group-label gk columns members))]
+                [:td.viz-col-fields
+                 (str/join ", " (map #(col-display-name % columns) members))]]))]]]]
        [:div.viz-no-data
         [:span "No data — "]
         [:a {:href "#"
