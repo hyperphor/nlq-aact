@@ -6,14 +6,15 @@
    pane / viz-card) instead of that ns's own monolithic `ui`, since `ui`
    bundles query+grid+viz into one fixed two-column layout with no layout
    knobs of its own."
-  (:require [re-frame.core :as rf]
-            [hyperphor.way.tabs :as tabs]
-            [hyperphor.way.ui.init :as init]
-            [hyperphor.way.cards :as cards]
-            [hyperphor.way.markdown :as md]
-            [hyperphor.nlq.frontend.qbox :as qbox]
-            [hyperphor.nlq.frontend.nlq-viz :as nlqv]
-            [hyperphor.nlq.frontend.sql-query :as sql-query]))
+  (:require [clojure.string :as str]
+             [re-frame.core :as rf]
+             [hyperphor.way.tabs :as tabs]
+             [hyperphor.way.ui.init :as init]
+             [hyperphor.way.cards :as cards]
+             [hyperphor.way.markdown :as md]
+             [hyperphor.nlq.frontend.qbox :as qbox]
+             [hyperphor.nlq.frontend.nlq-viz :as nlqv]
+             [hyperphor.nlq.frontend.sql-query :as sql-query]))
 
 ;; This app has exactly one project -- see CLAUDE.md.
 (def project "AACT")
@@ -106,11 +107,39 @@
 
 ;; ── Visualize page: split out of sql-query/ui per design/ui-makeover.md ──
 
+(defn viz-data-summary
+  "Shows the current query context (NL query, row count, columns).
+   When there are no results, prompts the user to run a query first."
+  []
+  (let [{:keys [nl query results columns]} @(rf/subscribe [:qbox-response :sql])]
+    [:div.viz-data-summary
+     (if (seq results)
+       [:<>
+        (when nl
+          [:div.viz-summary-row
+           [:span.viz-summary-label "Query"]
+           [:span.viz-summary-value nl]])
+        [:div.viz-summary-row
+         [:span.viz-summary-label "Rows"]
+         [:span.viz-summary-value (count results)]]
+        [:div.viz-summary-row
+         [:span.viz-summary-label "Columns"]
+         [:span.viz-summary-value
+          (->> (or (keys columns) (some-> results first keys))
+               (map name)
+               (str/join ", "))]]]
+       [:div.viz-no-data
+        [:span "No data — "]
+        [:a {:href "#"
+             :on-click (fn [e] (.preventDefault e) (rf/dispatch [:set-route [:home]]))}
+         "run a query first"]])]))
+
 (defn visualize
   []
   (let [{:keys [results]} @(rf/subscribe [:qbox-response :sql])]
     [:div.hstack.istack.m-3.gap-3 {:style {:height "90%"}}
-     [:div {:style {:max-width "600px" :min-width "600px"}}
+     [:div.vstack {:style {:max-width "600px" :min-width "600px"}}
+      [viz-data-summary]
       [sql-query/viz-card project results]]
      [:div.vstack {:style {:min-width "800px"}}
       [nlqv/ui results :sql-vizq]]]))
