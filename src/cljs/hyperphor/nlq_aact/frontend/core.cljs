@@ -173,9 +173,9 @@
                    (str/join ", " (map #(col-display-name % columns) members))]]))]]]]
          [:div.viz-no-data
           [:span "No data — "]
-          [:a {:href "#"
-               :on-click (fn [e] (.preventDefault e) (rf/dispatch [:set-route [:home]]))}
-           "run a query first"]])]))
+           [:a {:href "#"
+                :on-click (fn [e] (.preventDefault e) (rf/dispatch [:set-route [:home]]))}
+            "run a query first"]])])]))
 
 (defn visualize
   []
