@@ -47,7 +47,7 @@
              "browse_conditions" "browse_interventions"
              "baseline_measurements" "baseline_counts"
              "overall_officials"]
-    :source-label "AACT (Postgres)"
+    :source-label "AACT"
     :source-url "https://aact.ctti-clinicaltrials.org"}
    :schema "aact/schema.alz.edn"
    :sql-dialect "PostgreSQL"

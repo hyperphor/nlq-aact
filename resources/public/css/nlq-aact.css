@@ -52,6 +52,118 @@ a:hover {
   border-radius: 4px;
 }
 
+/* ── Top nav (hyperphor.way.tabs/tabs-nav) ───────────────────────────────
+   That component hardcodes Bootstrap's boxed nav-tabs markup -- restyled
+   here into a plain horizontal link row per design/ui-makeover.md ("get
+   rid of the tabs or make them look more like a web app"). text-transform
+   also papers over tabs.cljs's humanize, which only replaces "_" with " "
+   and doesn't capitalize (so a :home/:schema keyword renders lowercase). */
+
+.nav-tabs {
+  border-bottom: 1px solid #e3e3e3;
+  padding: 0 32px;
+  gap: 28px;
+}
+
+.nav-tabs .nav-item {
+  margin-bottom: 0;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  border-radius: 0;
+  padding: 12px 2px;
+  color: #4a4a4a;
+  font-weight: 500;
+  text-transform: capitalize;
+  border-bottom: 3px solid transparent;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #2f2f2f;
+  text-decoration: none;
+}
+
+.nav-tabs .nav-link.active {
+  color: #7a8a7f; /* echoes the site-hero gradient's sage tone */
+  border-bottom-color: #7a8a7f;
+  background: none;
+}
+
+/* ── Home page: intro line, above the query box ──────────────────────────
+   Replaces the old bootstrap alert-info box -- plain editorial text, same
+   max-width/centering as .query-hero below it so the two visually align. */
+
+.home-intro {
+  max-width: 900px;
+  margin: 24px auto 16px auto;
+  padding: 12px 16px;
+  background: #f4f2ee;
+  border: 1px solid #e3e0da;
+  border-radius: 10px;
+  color: #4a4a4a;
+  font-size: 1.05em;
+  line-height: 1.5;
+}
+
+.home-intro a {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Home page: big, obvious query box ───────────────────────────────────
+   hyperphor.nlq.frontend.qbox/ui hardcodes its own textarea/select inline
+   styles (width, font-size, margins) -- overridden here with !important
+   since inline style otherwise wins. See design/ui-makeover.md. */
+
+.query-hero {
+  max-width: 900px;
+  margin: 0 auto 24px auto;
+  padding: 24px 28px;
+  border: 2px solid #e3e0da;
+  border-radius: 10px;
+}
+
+.query-hero textarea.form-control {
+  width: 100% !important;
+  min-height: 70px;
+  font-size: 20px !important;
+  padding: 14px !important;
+}
+
+.query-hero button.btn-primary {
+  font-size: 17px;
+  padding: 10px 26px;
+}
+
+.query-hero select.form-control {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-top: 10px;
+  font-size: 15px !important;
+}
+
+/* ── Home page: results grid + side-cards, below the query box ──────────
+   Grid-first/wide + cards-second/narrow -- the mirror image of sql-query/
+   ui's own cards-first/narrow + grid-second/wide, per design/ui-makeover.md
+   ("below that, the data grid and side-cards"). */
+
+.results-row {
+  align-items: flex-start;
+  margin: 0 8px;
+}
+
+.results-grid {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 65vh; /* ag-grid needs an explicit container height, see below */
+}
+
+.results-side {
+  flex: 0 0 380px;
+  max-width: 380px;
+}
+
 /* ── About tab ────────────────────────────────────────────────────────── */
 
 .about-credits {

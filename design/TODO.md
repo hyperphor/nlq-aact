@@ -1,3 +1,16 @@
+# Inspector pane shouldn't show unless there is something there
+
+# Copied over from OKC
+## Visualization needs more appropriate examples (Or more rethinking)
+## Iconization/inspect improvements?
+## Column ordering
+
+
+# DONE BUG Multiple result sets 
+FIXED my god that was stupid and Claude did great
+
+# DONE Should only show inpsector pane when relevant
+
 # RuN SQL button has issues
 
 eg, not working at all with no error feedback or anything?
