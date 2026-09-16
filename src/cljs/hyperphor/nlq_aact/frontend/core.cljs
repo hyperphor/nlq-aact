@@ -183,12 +183,12 @@
   (let [{:keys [results]}                       @(rf/subscribe [:qbox-response :sql])
         {:keys [viz-spec viz-text error]}        @(rf/subscribe [:qbox-response :sql-vizq])]
     [:div.hstack.istack.m-3.gap-3 {:style {:height "90%"}}
-     [:div.vstack {:style {:max-width "600px" :min-width "600px"}}
+     [:div.vstack.gap-2 {:style {:max-width "600px" :min-width "600px"}}
       [viz-data-summary]
       [sql-query/viz-card project results]
       [cards/cards :sql-vizq-cards
        [(when viz-spec {:name :vega :view (fn [] [qbox/query-editor :sql-vizq project "Vega"])})
-        (when viz-text {:name :plan :view (fn [] [:div.m-3 (md/render viz-text)])})
+        (when (not-empty viz-text) {:name :plan :view (fn [] [:div.m-3 (md/render viz-text)])})
         (when error    {:name :error :open? true
                         :view (fn [] [:div.alert.alert-warning [:pre {:style {:text-wrap "auto"}} error]])})]]]
      [:div.vstack {:style {:min-width "800px"}}
