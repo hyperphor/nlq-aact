@@ -1,4 +1,26 @@
-# Inspector pane shouldn't show unless there is something there
+# Pre-release
+
+## DONE Visaulization should have Vega and plan panes
+Analagous to sql/plan on main page
+
+But no plan because LLM prompt is tighter, which is fine actually.
+
+## Verify and improve visualization examples
+## Inspector pane shouldn't show unless there is something there
+Huh had this marked as done but it reverted or somthing
+
+# Open/closed state of summary box should persist across reloads
+
+Or more generally, have conveinence features for managing that kind of state (in Way)
+
+# needs a visual distinction between real links and inspector links
+Used to have that but it disappeared?
+
+
+# Probably don't want updated_at etc in results
+
+Well if you say full table...
+
 
 # Copied over from OKC
 ## Visualization needs more appropriate examples (Or more rethinking)
@@ -6,30 +28,16 @@
 ## Column ordering
 
 
-# DONE BUG Multiple result sets 
-FIXED my god that was stupid and Claude did great
-
-# DONE Should only show inpsector pane when relevant
 
 # RuN SQL button has issues
 
 eg, not working at all with no error feedback or anything?
 
 # Too much stuff done in code that should be in schema
-
-
 	
 # log viewer for new DynamoDB log
 
-Basics can be copied from OKC/Bigquery version
-
-# I'm starting to want a library
-
-Like enflame had...but these queries are so low-cost to enter it probably doesn't make sense
-
-I would like an easy to share good examples though.
-
-Mayber part of a larger restructiong (with REPL etc)
+Basics can be copied from OKC/Bigquery version → nlq
 
 # Needs work on grid display side
 
