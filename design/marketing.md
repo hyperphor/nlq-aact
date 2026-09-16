@@ -1,3 +1,75 @@
+# Release to AaCT
+
+Asba Tasneem is first author on paper.
+
+Looks like the website just had a refresh (Sep 2026) so live i guess!
+
+A product of https://ctti-clinicaltrials.org/ 
+Contact CTTI
+Duke Clinical Research Institute
+ATTN: CTTI, P.O. Box 17969
+Durham, NC 27715
+
+## cold letter 
+
+Hello,
+
+I'm writing to let your organization know about something I buit on top of  your AACT database – a tool that provides a natural language query interface, and some data visualization capabilites as well.
+
+Available here: https://aact.hyperphor.com/
+
+Feedback is always welcome!
+
+Thank you for making your  database available as a public resource!
+
+Mike
+
+Notes:
+
+- The original application for these tools was for data acccess to data from specific clinical trials in cancer immunotherapy – same technology, different data schema. 
+
+- this is all open source so you are free to make whatever use of it you want. 
+
+- OTOH I am available for consulting (argh)
+
+- I don't expect this prototype to get heavy usage, but on the off chance that ti does and it causes any loading issues for your serivice – please let me know.
+
+## cold letter (professional draft)
+
+Subject: A natural-language query tool built on your AACT database
+
+Dear CTTI team,
+
+My name is Mike Travers. I'm writing to share a tool I've built on top of your AACT
+database, in case it's of interest to your team or the researchers who rely on AACT.
+
+The tool provides a natural-language query interface over AACT's clinical trials data,
+along with basic data visualization. Rather than writing SQL or navigating a fixed set
+of filters, a user can ask a question in plain English — e.g., "which melanoma trials
+showed a significant survival benefit" — and get back real, auditable SQL and results
+in a sortable grid.
+
+It's live here: https://aact.hyperphor.com/
+
+A few points that may be useful context:
+
+- The underlying technology was originally built for a narrower use case (data access
+  for a specific set of cancer immunotherapy trials) and has since been generalized;
+  AACT is the first public demonstration of it working against a different schema.
+- The project is open source, and CTTI is welcome to use or adapt it in any way.
+- This is a prototype and I don't expect it to see heavy traffic, but if it ever does
+  and causes any load concerns for your service, please let me know and I'll address
+  it promptly.
+
+I'd welcome any feedback, and I'm happy to answer questions about how it works. Thank
+you for making the AACT database available as a public resource — it made this
+possible.
+
+Best regards,
+Mike Travers
+
+
+
 # Competitive Analysis
 
 Compare this offering against other clinical trial search tools, especially those that use natural language. Is the schema-based approach an advantage? What about MCPs, Claude Science, stuff like that?

@@ -1,3 +1,8 @@
+# IDEA schema kinds are pluralized; would be good to convert to singluar
+via inflect of course
+
+Not sure if this will impact generation, but it would be more consistent with Alzabo convention
+
 # Pre-release
 
 ## DONE Visaulization should have Vega and plan panes
