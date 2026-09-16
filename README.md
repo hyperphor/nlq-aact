@@ -2,16 +2,13 @@
 
 A small standalone NL-query demo app over [AACT](https://aact.ctti-clinicaltrials.org)
 (Aggregate Analysis of ClinicalTrials.gov), built on `com.hyperphor/nlq`'s `:postgres`
-source. Unlike `hyperphor/nlq-demo` (a thin proxy in front of OKC), this app has its own
-live Postgres connection and doesn't depend on OKC at all.
+source. 
 
-See `/opt/mt/repos/pici/okc/design/pg-aact-split-plan.md` (in the ParkerICI/okc repo) for
-the full history of this split.
+[Live version](https:://aact.hyperphor.com)
 
 ## Status
 
-Backend + a minimal frontend: three tabs (about / NL query / schema browser), modeled
-directly on okc's own `frontend/core.cljs`. The NL_query tab is `hyperphor.nlq.frontend.
+Backend + a minimal frontend: three tabs (about / NL query / schema browser), The NL_query tab is `hyperphor.nlq.frontend.
 sql-query/ui` (the real query-UI component the library ships) called against the single
 `"AACT"` project; the schema tab is an iframe onto the generated Alzabo schema doc.
 
@@ -30,28 +27,8 @@ For frontend dev iteration, `npm install` once, then either `lein shadow watch a
 (hot-reload) or `lein shadow release app` (optimized, what the `:uberjar` profile's
 `prep-tasks` also run).
 
-## Known issue: `/api/config` currently ships credentials to the browser
 
-`hyperphor.way.ui.config/init` (which the frontend shell calls on every page load) fetches
-`GET /api/config`, which is `hyperphor.way.handler/base-api-routes`' `(content-response
-(config/config))` -- the **entire** raw config map, unredacted, including this app's
-`#env`-resolved `AACT_USER`/`AACT_PASSWORD`. (There's a properly-redacted path,
-`hyperphor.way.data`'s `:config` data-method via `/api/data?data-id=config`, but the real
-frontend init path doesn't use it.) This is a `hyperphor/way` bug, not specific to this
-app -- it affects every `way`-based frontend, including okc's own Cirro/BigQuery
-credentials -- so it isn't fixed here (out of scope for this repo). AACT's own exposure is
-lower-stakes (a read-only public-data reporting account), but worth fixing upstream before
-relying on this pattern for anything with real secrets.
-
-## Credentials
-
-No credentials live in this repo. `resources/config.edn` reads `AACT_USER`/
-`AACT_PASSWORD`/`PORT` via aero's `#env` reader tag, same pattern OKC uses for its own
-`:port #env PORT`. Never add a file with literal credentials in it (see OKC's untracked
-`scrap/postgres_private.clj` -- the plaintext-credential mistake this app exists to not
-repeat).
-
-## Query logging (optional)
+## Query logging 
 
 `resources/config.edn`'s `:nlq-log` entry, if present, logs every NL query to a
 DynamoDB table (`hyperphor.nlq.generate/record`, dispatching on `:nlq-log`'s `:type`

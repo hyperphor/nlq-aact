@@ -1,7 +1,5 @@
 (ns hyperphor.nlq-aact.schema-gen
-  "AACT-specific schema generation -- the half of pg-aact's original
-   sources/postgres.clj that was deliberately left out of the generic
-   hyperphor/nlq library (see okc's design/pg-aact-split-plan.md): the AACT
+  "AACT-specific schema generation: the AACT
    data-dictionary CSV loader, and the table names/docs/icons/labels/link
    templates that turn hyperphor.nlq.sources.postgres/gen-alz-schema (fully
    generic) into AACT's actual resources/aact/schema.alz.edn.
@@ -17,6 +15,10 @@
             [hyperphor.nlq.sources.postgres :as pg]
             [hyperphor.nlq.schema :as schema]
             [hyperphor.nlq.config :as nlqc]))
+
+;;; TODO not sure how useful this is, the AACT schema is not likely to change (project is dead) so will
+;;; not need regenerated. Might just want to use alz schema as source of truth and flush most of this
+
 
 ;;; The dictionary's Description column mixes real semantic docs in with
 ;;; structural boilerplate ("primary key", "foreign key referencing X") that's
@@ -111,6 +113,29 @@
    "baseline_measurements" "title"
    "overall_officials"    "name"})
 
+;; Hand-written field :doc overrides, same idea as table-docs but per-column
+;; -- for fields where AACT's own data-dictionary CSV (load-dictionary) has
+;; no Description text at all or where its terse label is
+;; actively misleading on its own. Merged *under* the dictionary in
+;; regenerate-schema (dictionary wins if it ever gains real text for the
+;; same field), keyed the same way: [table-name field-name].
+(def field-doc-overrides
+  {["studies" "overall_status"]
+   "The study's current status, per ClinicalTrials.gov's fixed vocabulary.
+    RECRUITING/NOT_YET_RECRUITING/ENROLLING_BY_INVITATION/ACTIVE_NOT_RECRUITING
+    are the actual trial-enrollment statuses. AVAILABLE (with its siblings
+    NO_LONGER_AVAILABLE/TEMPORARILY_NOT_AVAILABLE/APPROVED_FOR_MARKETING) is
+    a different thing entirely, not a stage of enrollment: it applies only
+    to Expanded Access records (study_type = 'EXPANDED_ACCESS') -- a
+    regulatory mechanism letting patients who don't qualify for the trial
+    itself get compassionate-use access to the investigational drug/device
+    outside of any controlled study. Confirmed live against AACT
+    (2026-08-25): 100% of AVAILABLE/NO_LONGER_AVAILABLE/
+    TEMPORARILY_NOT_AVAILABLE/APPROVED_FOR_MARKETING rows are
+    study_type = 'EXPANDED_ACCESS', 0% are INTERVENTIONAL/OBSERVATIONAL
+    trials -- so a query for 'available' trials almost certainly means
+    RECRUITING, not overall_status = 'AVAILABLE'."})
+
 ;; {{value}}-templated, matching hyperphor.nlq.schema/external-link-template's
 ;; generic mustache shape -- NOT pg-aact's original bare-prefix :external-url
 ;; (that mechanism was reconciled away during the library port, see
@@ -136,7 +161,9 @@
       :or {dictionary-csv-path "resources/aact/documentation_20260805.csv"
            out-path schema-out-path}}]
   (let [db (or db (:db (nlqc/project-named "AACT")))
-        dictionary (load-dictionary dictionary-csv-path)
+        ;; field-doc-overrides fills gaps in AACT's own dictionary (see its
+        ;; docstring) -- dictionary wins on any key both maps define.
+        dictionary (merge field-doc-overrides (load-dictionary dictionary-csv-path))
         schema (pg/gen-alz-schema db tables dictionary table-docs table-icons
                                   table-labels table-external-link-templates)
         schema (assoc schema :title "AACT (ClinicalTrials.gov) schema, generated subset")

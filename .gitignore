@@ -16,3 +16,4 @@
 .env
 .envrc.local
 checkouts
+design/*.html

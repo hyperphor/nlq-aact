@@ -21,7 +21,7 @@
   [id query _project]
   (case (keyword id)
     :sql              (nlq/endpoint "AACT" :sql query)
-    (:vizq :sql-vizq) (visgen/viz-endpoint "AAcT" query)
+    (:vizq :sql-vizq) (visgen/viz-endpoint "AACT" query)
     {:error (str "Unsupported query type for this app: " id)}))
 
 (defroutes site-routes)

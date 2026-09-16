@@ -47,7 +47,7 @@
              "browse_conditions" "browse_interventions"
              "baseline_measurements" "baseline_counts"
              "overall_officials"]
-    :source-label "AACT (Postgres)"
+    :source-label "AACT"
     :source-url "https://aact.ctti-clinicaltrials.org"}
    :schema "aact/schema.alz.edn"
    :sql-dialect "PostgreSQL"
@@ -136,7 +136,114 @@ JOIN ctgov.conditions c ON s.nct_id = c.nct_id
 WHERE c.downcase_name LIKE '%melanoma%'
   AND f.name ILIKE '%stanford%'
   AND oo.role = 'PRINCIPAL_INVESTIGATOR';"}
+    ;; eligibilities.criteria is free-text (the full inclusion/exclusion
+    ;; block as written in the protocol), not structured fields -- this is a
+    ;; keyword-search-over-prose pattern, not a guaranteed-precise filter.
+    ;; See design conversation, 2026-08-25: verified live, 11 real hits.
+    {:nl "Find melanoma trials where the eligibility criteria require the patient to have failed at least one prior treatment"
+     :sql "SELECT s.nct_id, s.brief_title, e.criteria
+FROM ctgov.studies s
+JOIN ctgov.conditions c ON s.nct_id = c.nct_id
+JOIN ctgov.eligibilities e ON s.nct_id = e.nct_id
+WHERE c.downcase_name LIKE '%melanoma%'
+  AND (e.criteria ILIKE '%failed prior treatment%'
+       OR e.criteria ILIKE '%at least one prior therapy%'
+       OR e.criteria ILIKE '%failure of previous treatment%');"}
+    ;; From design/aact-paper-ideas.md (AACT's own paper, Tasneem et al 2012,
+    ;; Figure 3): data completeness jumped after the Sept 2005 ICMJE
+    ;; registration policy and (more modestly) the 2007 FDAAA mandate.
+    ;; Verified live 2026-09-06: 1999 36.6% -> 2005 85.7% -> 2010 77.1%.
+    {:nl "What percentage of studies reported masking information, by year, from 1999 to 2010?"
+     :sql "SELECT extract(year from s.study_first_submitted_date)::int AS year,
+       count(*) AS total_studies,
+       count(d.masking) AS with_masking,
+       round(100.0 * count(d.masking) / count(*), 1) AS pct_with_masking
+FROM ctgov.studies s
+LEFT JOIN ctgov.designs d ON d.nct_id = s.nct_id
+WHERE s.study_first_submitted_date BETWEEN '1999-01-01' AND '2010-12-31'
+GROUP BY year
+ORDER BY year;"}
+    ;; FDAAA also mandated *posting results*, not just registering -- still a
+    ;; live compliance topic. Verified live 2026-09-06: real sponsors with
+    ;; 0% posted results among 20+ completed, >2-year-old trials.
+    {:nl "Which lead sponsors have the worst results-reporting compliance rate, among sponsors with at least 20 completed trials more than two years old?"
+     :sql "SELECT sp.name AS sponsor,
+       count(*) AS completed_trials,
+       count(*) FILTER (WHERE cv.were_results_reported) AS with_results,
+       round(100.0 * count(*) FILTER (WHERE cv.were_results_reported) / count(*), 1) AS pct_reported
+FROM ctgov.studies s
+JOIN ctgov.sponsors sp ON sp.nct_id = s.nct_id AND sp.lead_or_collaborator = 'lead'
+JOIN ctgov.calculated_values cv ON cv.nct_id = s.nct_id
+WHERE s.overall_status = 'COMPLETED'
+  AND s.completion_date < CURRENT_DATE - INTERVAL '2 years'
+GROUP BY sp.name
+HAVING count(*) >= 20
+ORDER BY pct_reported ASC
+LIMIT 15;"}
+    ;; Evidence-rigor query (paper's Discussion: "comparative distribution of
+    ;; evidence levels across specialties/conditions"). Verified live
+    ;; 2026-09-06: 4274 interventional melanoma trials, 7.8% both randomized
+    ;; and blinded.
+    {:nl "What percentage of interventional melanoma trials are both randomized and blinded?"
+     :sql "SELECT count(*) AS total_trials,
+       count(*) FILTER (WHERE d.allocation = 'RANDOMIZED') AS randomized,
+       count(*) FILTER (WHERE d.masking != 'NONE') AS masked,
+       count(*) FILTER (WHERE d.allocation = 'RANDOMIZED' AND d.masking != 'NONE') AS randomized_and_masked,
+       round(100.0 * count(*) FILTER (WHERE d.allocation = 'RANDOMIZED' AND d.masking != 'NONE') / count(*), 1) AS pct
+FROM ctgov.studies s
+JOIN ctgov.conditions c ON c.nct_id = s.nct_id
+JOIN ctgov.designs d ON d.nct_id = s.nct_id
+WHERE c.downcase_name LIKE '%melanoma%'
+  AND s.study_type = 'INTERVENTIONAL';"}
     ]
+    :llm {:provider :openai
+          :model "gpt-4o"
+          :system "You are a medical researcher and clinical trials expert."}}
+
+  ;; Vegalite: visualization project used by hyperphor.nlq.visgen/viz-endpoint.
+  ;; No :db or :schema needed — visgen works over @last-query-response, not the DB.
+  ;; :examples must carry :vega keys; only those are passed as few-shot to the LLM.
+  {:name "Vegalite"
    :llm {:provider :openai
          :model "gpt-4o"
-         :system "You are a computational biologist and clinical trials expert."}}]}
+         :system "You are a data visualization expert. Given a table of clinical trials data, produce a Vega-Lite spec (mark + encoding only, no $schema or data) that best answers the user's request."}
+   :examples
+   [{:nl "Bar chart of studies by phase"
+     :vega {:mark {:type "bar" :tooltip {:content "data"}}
+            :encoding {:x {:field "phase" :type "nominal"
+                           :sort "-y"
+                           :axis {:labelAngle -30}}
+                       :y {:aggregate "count" :type "quantitative"
+                           :title "Number of studies"}}}}
+
+    {:nl "Line chart of studies first posted by year from 2000 to 2020"
+     :vega {:mark {:type "line" :point true :tooltip {:content "data"}}
+            :encoding {:x {:field "year" :type "quantitative"
+                           :title "Year first posted"}
+                       :y {:aggregate "count" :type "quantitative"
+                           :title "Number of studies"}}}}
+
+    {:nl "Bar chart of the 15 most common conditions by study count"
+     :vega {:mark {:type "bar" :tooltip {:content "data"}}
+            :encoding {:y {:field "name" :type "nominal"
+                           :sort "-x"
+                           :axis {:labelLimit 200}}
+                       :x {:aggregate "count" :type "quantitative"
+                           :title "Number of studies"}}}}
+
+    {:nl "Histogram of enrollment for completed trials"
+     :vega {:mark {:type "bar" :tooltip {:content "data"}}
+            :encoding {:x {:field "enrollment" :type "quantitative"
+                           :bin {:maxbins 20}
+                           :title "Enrollment"}
+                       :y {:aggregate "count" :type "quantitative"
+                           :title "Number of trials"}}}}
+
+    {:nl "Stacked bar of study count by phase colored by overall status"
+     :vega {:mark {:type "bar" :tooltip {:content "data"}}
+            :encoding {:x {:field "phase" :type "nominal"
+                           :sort "-y"
+                           :axis {:labelAngle -30}}
+                       :y {:aggregate "count" :type "quantitative"
+                           :title "Number of studies"}
+                       :color {:field "overall_status" :type "nominal"}}}}]}]}
